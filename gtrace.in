@@ -1,0 +1,124 @@
+#!/bin/bash
+# gtrace -- a flexible gyron-tracing application for electromagnetic fields.
+# Copyright (C) 2024 Paulo Rodrigues.
+
+# gtrace is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+
+# gtrace is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License along with
+# gtrace. If not, see <https://www.gnu.org/licenses/>.
+
+# @gtrace.in, this file is part of gtrace.
+
+print_help () {
+  echo "\
+gtrace -- a flexible gyron-tracing application for electromagnetic fields.
+Powered by ::gyronimo::.
+
+Usage:
+gtrace [-h] -d driver_box -p pusher_box -f field_box -o observer_box
+       [-x target] -- [-h] [box options]
+
+gtrace is a command-line application to trace the orbits of gyrons (ie,
+gyro-moving beings like charged particles, guiding centres, etc) in
+electromagnetic fields. More information about gtrace is available in
+its documentation.
+
+In short, gtrace links the object-code files pointed by driver_box,
+pusher_box, field_box, and observer_box into an executable binary that
+will be stored in target if the latter is explicitly supplied via the -x
+flag (eg, for archival or later repeated usage), in which case the
+options after the double dash (--) have no effect. If -x target is
+omitted, the binary will first be stored at GTRACE_TMP/gtrace-tmp, then
+executed with the command-line options following --, and finally removed
+from GTRACE_TMP.
+
+Other options:
+  -h        Prints this help messages and exits if placed *before* the
+            double dash --, otherwise prints the help messages of each
+            of the required boxes.
+
+Environment variables:
+  GTRACE_LXX
+            Linker tool, defaults to the one used to build gtrace.
+            Useful to require specialised tools like mpic++ for
+            particular purposes. Notice that using different linking
+            tools with different components (gyronimo, gtrace, mpi, etc)
+            may, eventually, trigger library conflicts.
+  GTRACE_TMP
+            Path to a temporary folder for storing the binary during
+            execution (only if a target name has not been supplied
+            explicitly by -x). Requires read/write permissions, defaults
+            to /tmp.
+  GTRACE_LIBDIR
+            Path to a folder storing the libgtrace.a library. Defaults
+            to the build tree where gtrace was originally configured and
+            compiled."
+}
+
+checked_object_filename () {
+  OFILE="$1";
+  [[ ! -f "${OFILE}" ]] && OFILE="$( \
+    ALT_OFILE="${GTRACE_LIBDIR}/factories/${OFILE}"; \
+    [[ ! -f "${ALT_OFILE}" ]] && \
+      echo gtrace: cannot find ${OFILE} or ${ALT_OFILE} >&2 && exit 1;
+    echo ${ALT_OFILE} )";
+  echo "${OFILE}"
+}
+
+# default values for variables (can be overriden by the calling environment):
+[[ -z "${GTRACE_TMP}" ]] && GTRACE_TMP=/tmp
+[[ -z "${GTRACE_LXX}" ]] && GTRACE_LXX=GL__
+[[ -z "${GTRACE_LIBDIR}" ]] && GTRACE_LIBDIR=GB__
+
+# variables set (ie, hardwired) during gtrace configurations stage:
+GYRONIMO_BUILD=GYB__
+
+# test needed configuration variables:
+[[ ! -d "${GTRACE_TMP}" || ! -w "${GTRACE_TMP}" ]] && \
+  echo gtrace: no writable folder ${GTRACE_TMP} >&2 && exit 1
+[[ ! -f "${GTRACE_LIBDIR}/main.o" ]] && \
+  echo gtrace: no main.o in folder ${GTRACE_LIBDIR} >&2 && exit 1
+[[ ! -f "${GTRACE_LIBDIR}/libgtrace.a" ]] && \
+  echo gtrace: no libgtrace.a in folder ${GTRACE_LIBDIR} >&2 && exit 1
+[[ ! -d "${GYRONIMO_BUILD}" ]] && \
+  echo gtrace: no readable folder ${GYRONIMO_BUILD} >&2 && exit 1
+
+# handles options:
+PATH_PUSHER='';PATH_FIELD='';BIN_NAME='';PATH_DRIVER=''
+while getopts ":d:f:ho:p:x:" OPT; do
+  case ${OPT} in
+    d ) PATH_DRIVER="${OPTARG}";;
+    f ) PATH_FIELD="${OPTARG}";;
+    o ) PATH_OBSERVER="${OPTARG}";;
+    p ) PATH_PUSHER="${OPTARG}";;
+    x ) BIN_NAME="${OPTARG}";;
+    h|\? ) print_help; exit;;
+  esac
+done
+shift $((OPTIND-1))
+PATH_FIELD="$(checked_object_filename $PATH_FIELD)"
+PATH_DRIVER="$(checked_object_filename $PATH_DRIVER)"
+PATH_PUSHER="$(checked_object_filename $PATH_PUSHER)"
+PATH_OBSERVER="$(checked_object_filename $PATH_OBSERVER)"
+
+# links required modules into a binary target (to keep or to be run at TMP):
+BIN_TARGET=$([[ -z "${BIN_NAME}" ]] \
+  && echo ${GTRACE_TMP}/gtrace-tmp \
+  || echo ${BIN_NAME})
+${GTRACE_LXX} -o ${BIN_TARGET} ${GTRACE_LIBDIR}/main.o \
+  ${PATH_DRIVER} ${PATH_FIELD} ${PATH_PUSHER} ${PATH_OBSERVER} \
+  -L ${GTRACE_LIBDIR} -lgtrace \
+  -L ${GYRONIMO_BUILD} -lgyronimo -Wl,-rpath,${GYRONIMO_BUILD}
+
+# runs the binary at TMP and removes it when finished:
+if [[ -z "${BIN_NAME}" ]]; then \
+  ${BIN_TARGET} $@
+  rm ${BIN_TARGET}
+fi
