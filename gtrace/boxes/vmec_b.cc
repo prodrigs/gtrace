@@ -16,6 +16,10 @@
 
 // @boxes/vmec_b.cc, this file is part of gtrace.
 
+#include <gyronimo/fields/IR3field_c1_cache.hh>
+#include <gyronimo/metrics/metric_cache.hh>
+#include <gyronimo/metrics/morphism_cache.hh>
+
 #include <gtrace/boxes/vmec_b.hh>
 
 using gyronimo::multiroot_c1;
@@ -27,7 +31,11 @@ void vmec_b::print_help() {
       "\n"
       "Sets a gyronimo::equilibrium_vmec object (and its dependencies) by\n"
       "reading the vmec produced netcdf_file (mandatory argument).\n"
-      "Options (actually the gyronimo::morphism_vmec settings):\n"
+      "Options:\n"
+      "  -cached   Builds a level-1 cached version of the objects\n"
+      "            gyronimo::{equilibrium_vmec, metric_vmec, morphism_vmec}.\n"
+      "            It may improve performance, but not necessarily so.\n"
+      "Other options (actually the gyronimo::morphism_vmec settings):\n"
       "  -abstol=, -reltol=\n"
       "            Absolute and relative tolerances (default 1e-12).\n"
       "  -iterations=\n"
@@ -48,9 +56,19 @@ vmec_b::vmec_b(const argh::parser& argh_line)
   argh_line("abstol", 1e-12) >> settings.tolerance_abs;
   argh_line("reltol", 1e-12) >> settings.tolerance_rel;
 
-  morphism_ =
-      std::make_unique<morphism_vmec>(parser_.get(), ifactory_.get(), settings);
-  metric_ = std::make_unique<metric_vmec>(morphism_.get());
-  magnetic_field_ =
-      std::make_unique<equilibrium_vmec>(metric_.get(), ifactory_.get());
+  if (argh_line["cached"]) {
+    using gyronimo::IR3field_c1_cache;
+    using gyronimo::metric_cache, gyronimo::morphism_cache;
+    morphism_ = std::make_unique<morphism_cache<morphism_vmec>>(
+        parser_.get(), ifactory_.get(), settings);
+    metric_ = std::make_unique<metric_cache<metric_vmec>>(morphism_.get());
+    magnetic_field_ = std::make_unique<IR3field_c1_cache<equilibrium_vmec>>(
+        metric_.get(), ifactory_.get());
+  } else {
+    morphism_ = std::make_unique<morphism_vmec>(
+        parser_.get(), ifactory_.get(), settings);
+    metric_ = std::make_unique<metric_vmec>(morphism_.get());
+    magnetic_field_ =
+        std::make_unique<equilibrium_vmec>(metric_.get(), ifactory_.get());
+  }
 }
