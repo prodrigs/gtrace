@@ -28,8 +28,8 @@ using gyronimo::IR3;
 class pusher_box_t {
  public:
   virtual ~pusher_box_t() {};
-  virtual IR3 get_q() const = 0;
-  virtual IR3 get_dot_q() const = 0;
+  virtual IR3 get_q(double time) const = 0;
+  virtual IR3 get_dot_q(double time) const = 0;
   virtual void print_state(double time) const = 0;
   virtual double push_state(double time) = 0;
 };

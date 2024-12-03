@@ -41,8 +41,8 @@ class boris : public pusher_box_t {
   static void print_help();
   boris(const settings_t& settings, field_box_t* field_box);
   virtual ~boris() {};
-  virtual IR3 get_dot_q() const override { return stepper_.get_dot_q(state_); };
-  virtual IR3 get_q() const override { return stepper_.get_position(state_); };
+  virtual IR3 get_dot_q(double time) const override;
+  virtual IR3 get_q(double time) const override;
   virtual void print_state(double time) const override;
   virtual double push_state(double time) override;
  private:

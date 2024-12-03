@@ -23,7 +23,7 @@
 
 bool q_predicate::invoke_default(
     const pusher_box_t* pusher, double time) const {
-  IR3 q = pusher->get_q();
+  IR3 q = pusher->get_q(time);
   if (this->is_within_bounds(q)) {
     if (time == 0) pusher->print_state(time);
     if (time >= tfinal_) this->print_last_state(pusher, time);
@@ -36,7 +36,7 @@ bool q_predicate::invoke_default(
 
 bool q_predicate::invoke_step_mode(
     const pusher_box_t* pusher, double time) const {
-  IR3 q = pusher->get_q();
+  IR3 q = pusher->get_q(time);
   if (this->is_within_bounds(q)) {
     (*step_printer_.get())(pusher, time);
     return true;

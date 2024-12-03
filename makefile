@@ -60,7 +60,7 @@ gtrace: $(GTRACE_REPO)/gtrace.in
 	@sed -e 's GB__ $(GTRACE_BUILT_HERE) g' -e 's GL__ $(CXX) g' \
 		-e 's GYB__ $(GYRONIMO_BUILD) g' < $< > $@; chmod +x $@
 %.o:
-	@echo '  ->' $(notdir $<)
+	@echo '  ->' $@
 	@$(CXX) -std=c++20 -Wfatal-errors -c $< -o $@ $(CXXFLAGS) \
         -I $(GTRACE_REPO) -I $(PARSED_INCLUDES)
 
@@ -70,6 +70,8 @@ boxes/boris.o: boxes/boris.cc \
 boxes/driver_box.o: boxes/driver_box.cc driver_box.hh | boxes
 boxes/ensemble_async_mpi.o: boxes/ensemble_async_mpi.cc \
   ensemble_async_mpi.hh driver_box.hh observer_box.hh pusher_box.hh | boxes
+boxes/littlejohn1983.o: boxes/littlejohn1983.cc \
+  littlejohn1983.hh field_box.hh pusher_box.hh | boxes
 boxes/q_predicate.o: boxes/q_predicate.cc \
   q_predicate.hh step_printer.hh observer_box.hh | boxes
 boxes/single_gyron.o: boxes/single_gyron.cc \
@@ -81,14 +83,16 @@ boxes/vmec_b.o: boxes/vmec_b.cc vmec_b.hh field_box.hh | boxes
 # factories section:
 factories/boris.o: factories/boris.cc \
   boris.hh field_box.hh pusher_box.hh | factories
+factories/littlejohn1983.o: factories/littlejohn1983.cc \
+  littlejohn1983.hh field_box.hh pusher_box.hh | factories
 factories/ensemble_async_mpi.o: factories/ensemble_async_mpi.cc \
   ensemble_async_mpi.hh driver_box.hh observer_box.hh pusher_box.hh | factories
 factories/q_predicate.o: factories/q_predicate.cc \
-  q_predicate.hh step_printer.hh observer_box.hh | factories
+  q_predicate.hh step_printer.hh observer_box.hh pusher_box.hh | factories
 factories/single_gyron.o: factories/single_gyron.cc \
   single_gyron.hh driver_box.hh observer_box.hh pusher_box.hh | factories
 factories/step_printer.o: factories/step_printer.cc \
-  step_printer.hh observer_box.hh | factories
+  step_printer.hh observer_box.hh pusher_box.hh | factories
 factories/vmec_b.o: factories/vmec_b.cc vmec_b.hh field_box.hh | factories
 
 # utilities section:

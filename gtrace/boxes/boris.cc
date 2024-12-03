@@ -35,6 +35,10 @@ boris::boris(const settings_t& s, field_box_t* field_box)
   this->print_header();
 }
 
+IR3 boris::get_dot_q(double time) const { return stepper_.get_dot_q(state_); }
+
+IR3 boris::get_q(double time) const { return stepper_.get_position(state_); }
+
 IR3 boris::initial_velocity_from_energy_data() const {
   using gyronimo::aligned_frame;
   using gyronimo::codata::e;
