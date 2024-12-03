@@ -39,7 +39,7 @@ class boris : public pusher_box_t {
   };
   static settings_t parse_settings(const argh::parser& argh_line);
   static void print_help();
-  boris(const settings_t& settings, field_box_t* field_box);
+  boris(const settings_t& settings, const field_box_t* field_box);
   virtual ~boris() {};
   virtual IR3 get_dot_q(double time) const override;
   virtual IR3 get_q(double time) const override;
@@ -49,7 +49,7 @@ class boris : public pusher_box_t {
   const double time_step_;
   const settings_t settings_;
   const classical_boris stepper_;
-  const std::unique_ptr<field_box_t> field_box_;
+  const std::unique_ptr<const field_box_t> field_box_;
   state_t state_;
   void print_header() const;
   IR3 initial_velocity_from_energy_data() const;

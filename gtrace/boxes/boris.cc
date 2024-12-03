@@ -23,7 +23,7 @@
 
 #include <iostream>
 
-boris::boris(const settings_t& s, field_box_t* field_box)
+boris::boris(const settings_t& s, const field_box_t* field_box)
     : settings_(s), time_step_(s.time_final / s.samples),
       stepper_(
           s.lref, s.vref, s.charge / s.mass, field_box->get_magnetic_field(),
