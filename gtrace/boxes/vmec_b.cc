@@ -22,7 +22,10 @@
 
 #include <gtrace/boxes/vmec_b.hh>
 
-using gyronimo::multiroot_c1;
+const IR3field* vmec_b::get_magnetic_field() const {
+  return magnetic_field_.get();
+}
+const metric_covariant* vmec_b::get_metric() const { return metric_.get(); }
 
 void vmec_b::print_help() {
   std::string help_message =
@@ -49,7 +52,7 @@ vmec_b::vmec_b(const argh::parser& argh_line)
     : ifactory_(new cubic_gsl_factory()) {
   parser_ = std::make_unique<parser_vmec>(argh_line[1]);
 
-  multiroot_c1::settings_t settings = {
+  gyronimo::multiroot_c1::settings_t settings = {
       .method = gsl_multiroot_fdfsolver_newton,
       .is_residual_tested = (argh_line["test-residue"] ? true : false)};
   argh_line("iterations", 10) >> settings.iterations;

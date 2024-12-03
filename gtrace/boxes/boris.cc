@@ -129,10 +129,10 @@ void boris::print_state(double time) const {
   if (settings_.pkin)
     std::cout << " " << stepper_.energy_parallel(state_, time) << " "
               << stepper_.energy_perpendicular(state_, time);
+  const field_box_t* fb = field_box_.get();
   if (settings_.pb)
-    std::cout << " " << stepper_.magnetic_field()->magnitude(q, time);
-  if (settings_.pjac)
-    std::cout << " " << stepper_.magnetic_field()->metric()->jacobian(q);
+    std::cout << " " << fb->get_magnetic_field()->magnitude(q, time);
+  if (settings_.pjac) std::cout << " " << fb->get_metric()->jacobian(q);
 }
 
 double boris::push_state(double time) {

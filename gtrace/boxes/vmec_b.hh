@@ -38,9 +38,8 @@ class vmec_b : public field_box_t {
   virtual const IR3field* get_electric_field() const override {
     return nullptr;
   };
-  virtual const IR3field* get_magnetic_field() const override {
-    return magnetic_field_.get();
-  };
+  virtual const IR3field* get_magnetic_field() const override;
+  virtual const metric_covariant* get_metric() const override;
  private:
   std::unique_ptr<cubic_gsl_factory> ifactory_;
   std::unique_ptr<parser_vmec> parser_;

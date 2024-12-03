@@ -24,13 +24,22 @@
 #include <gtrace/argh.h>
 
 using gyronimo::IR3field;
+using gyronimo::metric_covariant;
 
 class field_box_t {
  public:
   virtual ~field_box_t() {};
   virtual const IR3field* get_electric_field() const = 0;
   virtual const IR3field* get_magnetic_field() const = 0;
+  virtual const metric_covariant* get_metric() const = 0;
+  bool is_metric_consistent() const;
 };
+
+inline bool field_box_t::is_metric_consistent() const {
+  const IR3field* E = this->get_electric_field();
+  const IR3field* B = this->get_magnetic_field();
+  return (E && B ? E->metric() == B->metric() : true);
+}
 
 field_box_t* create_linked_field_box(const argh::parser& command_line);
 

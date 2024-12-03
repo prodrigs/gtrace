@@ -29,6 +29,10 @@ pusher_box_t* create_linked_pusher_box(const argh::parser& argh_line) {
     std::cerr << "gtrace::boris: empty box, nothing to be done." << std::endl;
     return nullptr;
   }
+  if (!field_box->is_metric_consistent()) {
+    std::cerr << "gtrace::boris: inconsistent field box." << std::endl;
+    return nullptr;
+  }
   boris::settings_t settings = boris::parse_settings(argh_line);
   return new boris(settings, field_box);
 }
