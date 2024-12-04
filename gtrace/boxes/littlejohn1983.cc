@@ -1,0 +1,167 @@
+// gtrace -- a flexible gyron-tracing application for electromagnetic fields.
+// Copyright (C) 2024 Paulo Rodrigues.
+
+// gtrace is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the
+// Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+
+// gtrace is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+// for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with gtrace. If not, see <https://www.gnu.org/licenses/>.
+
+// @boxes/littlejohn1983.cc, this file is part of gtrace.
+
+#include <gyronimo/core/codata.hh>
+#include <gyronimo/dynamics/odeint_adapter.hh>
+#include <gyronimo/metrics/metric_connected.hh>
+
+#include <boost/numeric/odeint/stepper/runge_kutta4.hpp>
+#include <gtrace/boxes/littlejohn1983.hh>
+
+#include <iostream>
+
+IR3 littlejohn1983::get_dot_q(double time) const {
+  auto ds = eqs_motion_(state_, time);
+  return {ds[0], ds[1], ds[2]};
+};
+
+double littlejohn1983::get_energy_tilde(const settings_t& s) {
+  using gyronimo::codata::e, gyronimo::codata::m_proton;
+  const double energy_ref_ev = 0.5 * m_proton * s.mass * s.vref * s.vref / e;
+  return s.energy / energy_ref_ev;
+}
+
+double littlejohn1983::get_mu_tilde(
+    const settings_t& s, const field_box_t* fb) {
+  IR3 q_initial = {s.qu, s.qv, s.qw};
+  double B = fb->get_magnetic_field()->magnitude(q_initial, 0);
+  return (1 - s.pitch * s.pitch) * get_energy_tilde(s) / B;
+}
+
+IR3 littlejohn1983::get_q(double time) const {
+  return eqs_motion_.get_position(state_);
+};
+
+littlejohn1983::littlejohn1983(const settings_t& s, const field_box_t* fb)
+    : settings_(s), time_step_(s.time_final / s.samples), field_box_(fb),
+      eqs_motion_(
+          s.lref, s.vref, s.charge / s.mass, get_mu_tilde(s, fb),
+          dynamic_cast<const gyronimo::IR3field_c1*>(fb->get_magnetic_field()),
+          fb->get_electric_field()) {
+  test_pxyz_consistency(s, fb);
+  IR3 q_initial = {s.qu, s.qv, s.qw};
+  state_ = eqs_motion_.generate_state(
+      q_initial, get_energy_tilde(s),
+      (s.pitch < 0 ? guiding_centre::vpp_sign::minus :
+                     guiding_centre::vpp_sign::plus),
+      0);
+  this->print_header();
+}
+
+littlejohn1983::settings_t littlejohn1983::parse_settings(
+    const argh::parser& argh_line) {
+  settings_t settings;
+  argh_line("samples", 512) >> settings.samples;
+  argh_line("tfinal", 1) >> settings.time_final;
+  argh_line("lref", 1) >> settings.lref;
+  argh_line("vref", 1) >> settings.vref;
+  argh_line("mass", 1) >> settings.mass;
+  argh_line("charge", 1) >> settings.charge;
+  argh_line("qu", 0.1) >> settings.qu;
+  argh_line("qv", 0) >> settings.qv;
+  argh_line("qw", 0) >> settings.qw;
+  argh_line("energy", 1) >> settings.energy;
+  argh_line("pitch", 0.5) >> settings.pitch;
+  argh_line("gyrophase", 0) >> settings.gyrophase;
+  settings.pb = argh_line["pb"];
+  settings.phires = argh_line["phires"];
+  settings.pjac = argh_line["pjac"];
+  settings.pkin = argh_line["pkin"];
+  settings.pxyz = argh_line["pxyz"];
+  return settings;
+}
+
+void littlejohn1983::print_header() const {
+  std::cout << "# fields: t qu qv qw vpar";
+  if (settings_.pxyz) std::cout << " x y z";
+  if (settings_.pkin) std::cout << " Epar Eperp";
+  if (settings_.pb) std::cout << " B";
+  if (settings_.pjac) std::cout << " jac";
+  if (settings_.phires) {
+    std::cout.precision(16);
+    std::cout.setf(std::ios::scientific);
+  }
+  std::cout << "\n";
+}
+
+void littlejohn1983::print_help() {
+  std::string help_message =
+      "pusher_box -> gtrace::littlejohn1983\n"
+      "Usage: gtrace link_options -- [...] [littlejohn1983 options] [...]\n"
+      "\n"
+      "Sets up a gyronimo::guiding_centre object (and all its dependencies)\n"
+      "to be traced along an electromagnetic field defined by some field_box\n"
+      "(the -f link option). By default, the virtual method\n"
+      "pusher_box::print_state(time) sends to stdout the time and contents\n"
+      "of littlejohn1983::state_t (no newline). This can be tailored by\n"
+      "additional output flags.\n"
+      "Options:\n"
+      "  -lref=    Reference length (in SI, default 1).\n"
+      "  -vref=    Reference velocity (in SI, default 1).\n"
+      "  -mass=    Particle mass (in m_proton, default 1).\n"
+      "  -charge=  Particle charge (in q_proton, default 1).\n"
+      "  -qu=, -qv=, -qw=\n"
+      "            Initial position in the coordinates and units defined by\n"
+      "            the respective field_box object.\n"
+      "  -energy=, -pitch=\n"
+      "            Initial energy (eV) and pitch (v_par/v).\n"
+      "  -samples= Number of time samples (tfinal/time_step, default 512).\n"
+      "Options controlling the output:\n"
+      "  -pb       Magnetic-field norm (in gyronimo::IR3field::m_factor).\n"
+      "  -phires   Turns on high-resolution (16 digits) scientific format.\n"
+      "  -pjac     Jacobian (ie, sqrt(det(g))) of the coordinate system.\n"
+      "  -pkin     Parallel and perpendicular energy (in si mass*vref^2/2).\n"
+      "  -pxyz     Cartesian position (si, for connected metrics only).\n";
+  std::cout << help_message << std::endl;
+}
+
+void littlejohn1983::print_state(double time) const {
+  std::cout << time;
+  for (auto s : state_) std::cout << " " << s;
+  IR3 q = eqs_motion_.get_position(state_);
+  if (settings_.pxyz) {
+    using gyronimo::metric_connected;
+    const metric_connected* mc =
+        static_cast<const metric_connected*>(field_box_->get_metric());
+    for (auto s : (*mc->my_morphism())(q)) std::cout << " " << s;
+  }
+  if (settings_.pkin)
+    std::cout << " " << eqs_motion_.energy_parallel(state_) << " "
+              << eqs_motion_.energy_perpendicular(state_, time);
+  const field_box_t* fb = field_box_.get();
+  if (settings_.pb)
+    std::cout << " " << fb->get_magnetic_field()->magnitude(q, time);
+  if (settings_.pjac) std::cout << " " << fb->get_metric()->jacobian(q);
+}
+
+double littlejohn1983::push_state(double time) {
+  using gyronimo::odeint_adapter;
+  boost::numeric::odeint::runge_kutta4<state_t> stepper;
+  stepper.do_step(odeint_adapter(&eqs_motion_), state_, time, time_step_);
+  return time + time_step_;
+}
+
+void littlejohn1983::test_pxyz_consistency(
+    const settings_t& s, const field_box_t* fb) {
+  using gyronimo::metric_connected;
+  if (s.pxyz && !dynamic_cast<const metric_connected*>(fb->get_metric())) {
+    std::cerr << "gtrace::littlejohn1983: "
+              << "inconsistent -pxyz and non-connected metric." << std::endl;
+    std::exit(1);
+  }
+}
