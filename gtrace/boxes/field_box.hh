@@ -21,7 +21,7 @@
 
 #include <gyronimo/fields/IR3field.hh>
 
-#include <gtrace/argh.h>
+#include <gtrace/tools/argh.h>
 
 using gyronimo::IR3field;
 using gyronimo::metric_covariant;

@@ -19,7 +19,7 @@
 #ifndef GTRACE_DRIVER_BOX
 #define GTRACE_DRIVER_BOX
 
-#include <gtrace/argh.h>
+#include <gtrace/tools/argh.h>
 #include <gtrace/boxes/observer_box.hh>
 #include <gtrace/boxes/pusher_box.hh>
 

@@ -30,8 +30,8 @@ ifeq ($(shell [[ ! -f $(GYRONIMO_BUILD)/gyronimo-config ]] && echo BAD), BAD)
 endif
 
 # print useful info to stdout:
-$(info compiling gtrace: $(CXX) $(CXXFLAGS))
-$(info gyronimo build tree: $(GYRONIMO_BUILD))
+$(info * compiling gtrace: $(CXX) $(CXXFLAGS))
+$(info * gyronimo build tree: $(GYRONIMO_BUILD))
 
 # craft derivative products:
 GTRACE_BUILT_HERE := $(CURDIR)
@@ -46,7 +46,7 @@ FACTORIES := $(notdir $(wildcard $(GTRACE_REPO)/gtrace/factories/*.cc))
 PREFIXED_FACTORIES=$(addprefix factories/, $(FACTORIES:.cc=.o))
 
 # sets separate search paths for headers and sources:
-vpath %.hh $(GTRACE_REPO)/gtrace:$(GTRACE_REPO)/gtrace/boxes
+vpath %.hh $(GTRACE_REPO)/gtrace/boxes:$(GTRACE_REPO)/gtrace/tools
 vpath %.cc $(GTRACE_REPO)/gtrace
 
 .PHONY: all clean
@@ -64,14 +64,15 @@ gtrace: $(GTRACE_REPO)/gtrace.in
 	@$(CXX) -std=c++20 -Wfatal-errors -c $< -o $@ $(CXXFLAGS) \
         -I $(GTRACE_REPO) -I $(PARSED_INCLUDES)
 
-# boxes section:
+# boxes section (alphabetic order):
 boxes/boris.o: boxes/boris.cc \
   boris.hh field_box.hh pusher_box.hh | boxes
 boxes/driver_box.o: boxes/driver_box.cc driver_box.hh | boxes
 boxes/ensemble_async_mpi.o: boxes/ensemble_async_mpi.cc \
   ensemble_async_mpi.hh driver_box.hh observer_box.hh pusher_box.hh | boxes
 boxes/littlejohn1983.o: boxes/littlejohn1983.cc \
-  littlejohn1983.hh field_box.hh pusher_box.hh | boxes
+  littlejohn1983.hh field_box.hh pusher_box.hh \
+  odeint_stepper.hh odeint_wrapper.hh | boxes
 boxes/q_predicate.o: boxes/q_predicate.cc \
   q_predicate.hh step_printer.hh observer_box.hh | boxes
 boxes/single_gyron.o: boxes/single_gyron.cc \
@@ -80,7 +81,7 @@ boxes/step_printer.o: boxes/step_printer.cc \
   step_printer.hh observer_box.hh | boxes
 boxes/vmec_b.o: boxes/vmec_b.cc vmec_b.hh field_box.hh | boxes
 
-# factories section:
+# factories section (alphabetic order):
 factories/boris.o: factories/boris.cc \
   boris.hh field_box.hh pusher_box.hh | factories
 factories/littlejohn1983.o: factories/littlejohn1983.cc \

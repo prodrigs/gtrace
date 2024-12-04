@@ -23,6 +23,7 @@
 
 #include <gtrace/boxes/field_box.hh>
 #include <gtrace/boxes/pusher_box.hh>
+#include <gtrace/tools/odeint_stepper.hh>
 
 #include <memory>
 
@@ -36,26 +37,31 @@ class littlejohn1983 : public pusher_box_t {
     double charge, lref, mass, time_final, vref;
     double qu, qv, qw, energy, gyrophase, pitch;
     bool pb, phires, pjac, pkin, pxyz;
+    std::string odeint;
   };
   static settings_t parse_settings(const argh::parser& argh_line);
   static void print_help();
+
   littlejohn1983(const settings_t& settings, const field_box_t* field_box);
   virtual ~littlejohn1983() {};
   virtual IR3 get_dot_q(double time) const override;
   virtual IR3 get_q(double time) const override;
   virtual void print_state(double time) const override;
-  virtual double push_state(double time) override;
+  virtual double push_state(double time) override {
+    return (*stepper_).do_step(eqs_motion_, state_, time, time_step_);
+  };
  private:
   const double time_step_;
   const settings_t settings_;
   const guiding_centre eqs_motion_;
   const std::unique_ptr<const field_box_t> field_box_;
+  const std::unique_ptr<odeint_stepper<guiding_centre>> stepper_;
   state_t state_;
-  void print_header() const;
 
   static double get_energy_tilde(const settings_t& s);
   static double get_mu_tilde(const settings_t& s, const field_box_t* fb);
-  static void test_pxyz_consistency(const settings_t& s, const field_box_t* fb);
+  static bool is_pxyz_inconsistent(const settings_t& s, const field_box_t* fb);
+  void print_header() const;
 };
 
 #endif  // GTRACE_LITTLEJOHN1983

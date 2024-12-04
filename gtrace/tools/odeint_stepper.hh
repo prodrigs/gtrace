@@ -14,26 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with gtrace. If not, see <https://www.gnu.org/licenses/>.
 
-// @boxes/pusher_box.hh, this file is part of gtrace.
+// @tools/odeint_stepper.hh, this file is part of gtrace.
 
-#ifndef GTRACE_PUSHER_BOX
-#define GTRACE_PUSHER_BOX
+#ifndef GTRACE_ODEINT_STEPPER
+#define GTRACE_ODEINT_STEPPER
 
-#include <gyronimo/core/IR3algebra.hh>
-
-#include <gtrace/tools/argh.h>
-
-using gyronimo::IR3;
-
-class pusher_box_t {
+template<typename EqSystem> class odeint_stepper {
  public:
-  virtual ~pusher_box_t() {};
-  virtual IR3 get_q(double time) const = 0;
-  virtual IR3 get_dot_q(double time) const = 0;
-  virtual void print_state(double time) const = 0;
-  virtual double push_state(double time) = 0;
+  using state_t = EqSystem::state;
+  virtual ~odeint_stepper() {};
+  virtual double do_step(
+      const EqSystem& eqs, state_t& state, double t, double dt) = 0;
 };
 
-pusher_box_t* create_linked_pusher_box(const argh::parser& command_line);
-
-#endif  // GTRACE_PUSHER_BOX
+#endif  // GTRACE_ODEINT_STEPPER

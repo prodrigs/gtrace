@@ -17,11 +17,10 @@
 // @boxes/littlejohn1983.cc, this file is part of gtrace.
 
 #include <gyronimo/core/codata.hh>
-#include <gyronimo/dynamics/odeint_adapter.hh>
 #include <gyronimo/metrics/metric_connected.hh>
 
-#include <boost/numeric/odeint/stepper/runge_kutta4.hpp>
 #include <gtrace/boxes/littlejohn1983.hh>
+#include <gtrace/tools/odeint_wrapper.hh>
 
 #include <iostream>
 
@@ -47,19 +46,28 @@ IR3 littlejohn1983::get_q(double time) const {
   return eqs_motion_.get_position(state_);
 };
 
+bool littlejohn1983::is_pxyz_inconsistent(
+    const settings_t& s, const field_box_t* fb) {
+  using gyronimo::metric_connected;
+  if (!s.pxyz || dynamic_cast<const metric_connected*>(fb->get_metric()))
+    return false;
+  std::cerr << "gtrace::littlejohn1983: "
+            << "inconsistent -pxyz and non-connected metric.\n";
+  return true;
+}
+
 littlejohn1983::littlejohn1983(const settings_t& s, const field_box_t* fb)
     : settings_(s), time_step_(s.time_final / s.samples), field_box_(fb),
+      stepper_(odeint_stepper_factory<guiding_centre>(s.odeint)),
       eqs_motion_(
           s.lref, s.vref, s.charge / s.mass, get_mu_tilde(s, fb),
           dynamic_cast<const gyronimo::IR3field_c1*>(fb->get_magnetic_field()),
           fb->get_electric_field()) {
-  test_pxyz_consistency(s, fb);
+  if (is_pxyz_inconsistent(s, fb)) std::exit(1);
   IR3 q_initial = {s.qu, s.qv, s.qw};
   state_ = eqs_motion_.generate_state(
       q_initial, get_energy_tilde(s),
-      (s.pitch < 0 ? guiding_centre::vpp_sign::minus :
-                     guiding_centre::vpp_sign::plus),
-      0);
+      (s.pitch < 0 ? guiding_centre::minus : guiding_centre::plus), 0);
   this->print_header();
 }
 
@@ -78,6 +86,7 @@ littlejohn1983::settings_t littlejohn1983::parse_settings(
   argh_line("energy", 1) >> settings.energy;
   argh_line("pitch", 0.5) >> settings.pitch;
   argh_line("gyrophase", 0) >> settings.gyrophase;
+  argh_line("odeint", "rungekutta") >> settings.odeint;
   settings.pb = argh_line["pb"];
   settings.phires = argh_line["phires"];
   settings.pjac = argh_line["pjac"];
@@ -104,12 +113,12 @@ void littlejohn1983::print_help() {
       "pusher_box -> gtrace::littlejohn1983\n"
       "Usage: gtrace link_options -- [...] [littlejohn1983 options] [...]\n"
       "\n"
-      "Sets up a gyronimo::guiding_centre object (and all its dependencies)\n"
-      "to be traced along an electromagnetic field defined by some field_box\n"
-      "(the -f link option). By default, the virtual method\n"
-      "pusher_box::print_state(time) sends to stdout the time and contents\n"
-      "of littlejohn1983::state_t (no newline). This can be tailored by\n"
-      "additional output flags.\n"
+      "Sets up a gyronimo::guiding_centre object (and its dependencies) to be\n"
+      "traced along an electromagnetic field defined by some field_box (set\n"
+      "by the -f link option) employing an available odeint algorithm. By\n"
+      "default, the virtual method pusher_box::print_state(time) sends to\n"
+      "stdout the time and contents of littlejohn1983::state_t (no newline).\n"
+      "This can be tailored by additional output flags.\n"
       "Options:\n"
       "  -lref=    Reference length (in SI, default 1).\n"
       "  -vref=    Reference velocity (in SI, default 1).\n"
@@ -120,6 +129,7 @@ void littlejohn1983::print_help() {
       "            the respective field_box object.\n"
       "  -energy=, -pitch=\n"
       "            Initial energy (eV) and pitch (v_par/v).\n"
+      "  -odeint=  ODE algorithm (adams, fehlberg, defaults to rungekutta).\n"
       "  -samples= Number of time samples (tfinal/time_step, default 512).\n"
       "Options controlling the output:\n"
       "  -pb       Magnetic-field norm (in gyronimo::IR3field::m_factor).\n"
@@ -147,21 +157,4 @@ void littlejohn1983::print_state(double time) const {
   if (settings_.pb)
     std::cout << " " << fb->get_magnetic_field()->magnitude(q, time);
   if (settings_.pjac) std::cout << " " << fb->get_metric()->jacobian(q);
-}
-
-double littlejohn1983::push_state(double time) {
-  using gyronimo::odeint_adapter;
-  boost::numeric::odeint::runge_kutta4<state_t> stepper;
-  stepper.do_step(odeint_adapter(&eqs_motion_), state_, time, time_step_);
-  return time + time_step_;
-}
-
-void littlejohn1983::test_pxyz_consistency(
-    const settings_t& s, const field_box_t* fb) {
-  using gyronimo::metric_connected;
-  if (s.pxyz && !dynamic_cast<const metric_connected*>(fb->get_metric())) {
-    std::cerr << "gtrace::littlejohn1983: "
-              << "inconsistent -pxyz and non-connected metric." << std::endl;
-    std::exit(1);
-  }
 }
