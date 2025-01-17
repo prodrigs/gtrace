@@ -1,5 +1,5 @@
 // gtrace -- a flexible gyron-tracing application for electromagnetic fields.
-// Copyright (C) 2024 Paulo Rodrigues.
+// Copyright (C) 2024-2025 Paulo Rodrigues.
 
 // gtrace is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -32,11 +32,6 @@ ensemble_async_mpi::~ensemble_async_mpi() { MPI_Finalize(); }
 
 int ensemble_async_mpi::operator()(int argc, char* argv[]) const {
   auto argh_line = this->argh_line();
-  if (argh_line[{"h", "help"}]) {
-    if (mpi_rank_ == 0) this->print_help();
-    return 1;
-  }
-
   auto [in_stream, in_filename] = this->get_input_stream(argh_line, mpi_rank_);
   stream_redirector redirected_in_scope(std::cout, in_filename + ".cout");
 
@@ -56,36 +51,6 @@ int ensemble_async_mpi::operator()(int argc, char* argv[]) const {
 
   in_stream.close();
   return 0;
-}
-
-void ensemble_async_mpi::print_help() {
-  driver_box_t::print_version();
-  std::string usage_message =
-      "\n"
-      "driver_box -> gtrace::ensemble_async_mpi\n"
-      "Usage: gtrace link_options -- -prefix= [-tfinal=] [shared_options]\n"
-      "\n"
-      "Integrates a collection (ensemble) of gyrons (ie, particles, guiding\n"
-      "centres, etc) much like in gtrace::ensemble_async (more details in its\n"
-      "documentation). However, the full ensemble is here split by a number\n"
-      "of mpi parallel processes, each one integrating asynchronously its\n"
-      "corresponding sub-ensemble. There must be as many input files as\n"
-      "running processes, each one named as prefix-nnn, with nnn the process\n"
-      "rank number. The output printed by the pusher_box to std::cout is\n"
-      "redirected to files named prefix-nnn.cout.\n"
-      "Options:\n"
-      "  -prefix=  Prefix of input & output filenames. Input files must be\n"
-      "            named as prefix-nnn (nnn being the process rank), the\n"
-      "            corresponding output being stored in prefix-nnn.cout.\n"
-      "  -tfinal=  Time-integration limit (default 1, in pusher_box units).\n";
-  std::cout << usage_message << std::endl;
-  driver_box_t::print_help();
-
-  auto help_argh = argh::parser("-help");
-  pusher_box_t* dummy_pusher = create_linked_pusher_box(help_argh);
-  if (dummy_pusher) delete dummy_pusher;
-  observer_box_t* dummy_observer = create_linked_observer_box(help_argh);
-  if (dummy_observer) delete dummy_observer;
 }
 
 std::string ensemble_async_mpi::convert_argv_to_string(char* argv[]) const {

@@ -1,5 +1,5 @@
 // gtrace -- a flexible gyron-tracing application for electromagnetic fields.
-// Copyright (C) 2024 Paulo Rodrigues.
+// Copyright (C) 2024-2025 Paulo Rodrigues.
 
 // gtrace is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -21,9 +21,22 @@
 
 #include <gtrace/boxes/observer_box.hh>
 
+/*!
+Sequential integration-step printer.
+------------------------------------
+
+Calls the virtual function `pusher->print_state(time)`, as implemented by the
+particular `pusher_box_t` invoked, sequentially throughout the entire
+integration process (provides no termination condition by itself), eventually
+skipping skip time steps.
+
+Observer options:
+
+ + `-skip=val` Number of time steps to be skipped (default 0).
+ + `-skip-initial` Skips also the step corresponding to time=0.
+!*/
 class step_printer : public observer_box_t {
  public:
-  static void print_help();
   step_printer(const argh::parser& argh_line);
   virtual ~step_printer() {};
   virtual bool operator()(

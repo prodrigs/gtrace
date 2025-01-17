@@ -1,6 +1,6 @@
 #!/bin/bash
 # gtrace -- a flexible gyron-tracing application for electromagnetic fields.
-# Copyright (C) 2024 Paulo Rodrigues.
+# Copyright (C) 2024-2025 Paulo Rodrigues.
 
 # gtrace is free software: you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
@@ -19,38 +19,37 @@
 print_help () {
   echo "\
 gtrace -- a flexible gyron-tracing application for electromagnetic fields.
-Powered by ::gyronimo::.
+powered by ::gyronimo::.
 
 Usage:
 gtrace [-h] -d driver_box -p pusher_box -f field_box -o observer_box
-       [-x target] -- [-h] [box options]
+       [-x target] -- box_options
 
 gtrace is a command-line application to trace the orbits of gyrons (ie,
-gyro-moving beings like charged particles, guiding centres, etc) in
-electromagnetic fields. More information about gtrace is available in
-its documentation.
+gyro-moving beings such as charged particles, guiding centres, etc) in
+electromagnetic fields. More information about gtrace is available via
+its documented source code.
 
 In short, gtrace links the object-code files pointed by driver_box,
 pusher_box, field_box, and observer_box into an executable binary that
 will be stored in target if the latter is explicitly supplied via the -x
 flag (eg, for archival or later repeated usage), in which case the
 options after the double dash (--) have no effect. If -x target is
-omitted, the binary will first be stored at GTRACE_TMP/gtrace-tmp, then
+omitted, the binary will first be stored at GTRACE_TMP/gtrace-nnn, then
 executed with the command-line options following --, and finally removed
 from GTRACE_TMP.
 
 Other options:
-  -h        Prints this help messages and exits if placed *before* the
-            double dash --, otherwise prints the help messages of each
-            of the required boxes.
+  -h        Prints this help messages and exits.
 
 Environment variables:
   GTRACE_LXX
             Linker tool, defaults to the one used to build gtrace.
-            Useful to require specialised tools like mpic++ for
-            particular purposes. Notice that using different linking
-            tools with different components (gyronimo, gtrace, mpi, etc)
-            may, eventually, trigger library conflicts.
+            Useful to require specialised tools for particular purposes
+            (eg., mpic++ for linking mpi code) or request additional
+            libraries (eg., -L/path/to/my_version -lmy_library). Notice
+            that mixing different linking tools and libraries (gyronimo,
+            gtrace, mpi, etc) may, eventually, trigger conflicts.
   GTRACE_TMP
             Path to a temporary folder for storing the binary during
             execution (only if a target name has not been supplied
@@ -110,7 +109,7 @@ PATH_OBSERVER="$(checked_object_filename $PATH_OBSERVER)"
 
 # links required modules into a binary target (to keep or to be run at TMP):
 BIN_TARGET=$([[ -z "${BIN_NAME}" ]] \
-  && echo ${GTRACE_TMP}/gtrace-tmp \
+  && echo ${GTRACE_TMP}/gtrace-$$ \
   || echo ${BIN_NAME})
 ${GTRACE_LXX} -o ${BIN_TARGET} ${GTRACE_LIBDIR}/main.o \
   ${PATH_DRIVER} ${PATH_FIELD} ${PATH_PUSHER} ${PATH_OBSERVER} \

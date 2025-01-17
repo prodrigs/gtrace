@@ -1,5 +1,5 @@
 // gtrace -- a flexible gyron-tracing application for electromagnetic fields.
-// Copyright (C) 2024 Paulo Rodrigues.
+// Copyright (C) 2024-2025 Paulo Rodrigues.
 
 // gtrace is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -33,19 +33,4 @@ bool step_printer::operator()(const pusher_box_t* pusher, double time) const {
     skipped_steps_ = 0;
   }
   return true;
-}
-
-void step_printer::print_help() {
-  std::string help_message =
-      "observer_box -> gtrace::step_printer\n"
-      "Usage: gtrace link_options -- [...] [step_printer options] [...]\n"
-      "\n"
-      "Calls pusher->print_state(time) sequentially throughout the entire\n"
-      "integration process (provides no termination condition by itself),\n"
-      "eventually skipping skip time steps.\n"
-      "Options:\n"
-      "  -skip=   Number of time steps to be skipped (default 0).\n"
-      "  -skip-initial\n"
-      "           Skips also the step corresponding to time=0.\n";
-  std::cout << help_message << std::endl;
 }

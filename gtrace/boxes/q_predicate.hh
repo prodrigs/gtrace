@@ -1,5 +1,5 @@
 // gtrace -- a flexible gyron-tracing application for electromagnetic fields.
-// Copyright (C) 2024 Paulo Rodrigues.
+// Copyright (C) 2024-2025 Paulo Rodrigues.
 
 // gtrace is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -23,9 +23,27 @@
 
 #include <memory>
 
+/*!
+Conditional integration via a gyron-position predicate.
+-------------------------------------------------------
+
+Breaks time integration if the gyron's position moves outside the bounds
+established by the supplied options. These coordinate bounds are to be
+interpreted in terms of the relevant `field_box_t` object. By default, the
+virtual member `pusher_box_t::print_state(time)` is invoked at `time=0` (if the
+initial position lies within bounds) and at the first time step after
+`time<tfinal` or after the gyron's position moves out of bounds.  Alternatively,
+the option `-step-mode` forces a `step_printer` observer to be built and invokes
+it at every time step within the requested bounds (all step_printer options
+apply).
+
+Observer options:
+
+ + `-qumin=val, -qumax=val` Position limits (default lowest/largest double).
+ + `-step-mode` Builds a `step_printer` observer and invokes it within bounds.
+!*/
 class q_predicate : public observer_box_t {
  public:
-  static void print_help();
   q_predicate(const argh::parser& argh_line);
   virtual ~q_predicate() {};
   virtual bool operator()(

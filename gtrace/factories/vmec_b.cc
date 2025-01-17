@@ -1,5 +1,5 @@
 // gtrace -- a flexible gyron-tracing application for electromagnetic fields.
-// Copyright (C) 2024 Paulo Rodrigues.
+// Copyright (C) 2024-2025 Paulo Rodrigues.
 
 // gtrace is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -19,9 +19,5 @@
 #include <gtrace/boxes/vmec_b.hh>
 
 field_box_t* create_linked_field_box(const argh::parser& argh_line) {
-  if (argh_line[{"h", "help"}]) {
-    vmec_b::print_help();
-    return nullptr;
-  }
   return new vmec_b(argh_line);
 }

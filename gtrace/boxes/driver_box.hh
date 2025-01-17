@@ -1,5 +1,5 @@
 // gtrace -- a flexible gyron-tracing application for electromagnetic fields.
-// Copyright (C) 2024 Paulo Rodrigues.
+// Copyright (C) 2024-2025 Paulo Rodrigues.
 
 // gtrace is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -19,14 +19,23 @@
 #ifndef GTRACE_DRIVER_BOX
 #define GTRACE_DRIVER_BOX
 
-#include <gtrace/tools/argh.h>
 #include <gtrace/boxes/observer_box.hh>
 #include <gtrace/boxes/pusher_box.hh>
+#include <gtrace/tools/argh.h>
 
+/*!
+Base class for gyron-integration drivers.
+-----------------------------------------
+
+Options:
+
+ + `-elapsed` Prints the elapsed time for each orbit (defaults to no print).
+ + `-peek-beyond-tfinal`\
+    Invokes the observer also on the state that is pushed one time step beyond
+    the integration limit `tfinal`.
+!*/
 class driver_box_t {
  public:
-  static void print_help();
-  static void print_version(bool is_hashed = false);
   static void print_header(int argc, char* argv[]);
   driver_box_t(int argc, char* argv[]);
   virtual ~driver_box_t() {};

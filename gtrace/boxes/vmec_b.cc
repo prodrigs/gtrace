@@ -1,5 +1,5 @@
 // gtrace -- a flexible gyron-tracing application for electromagnetic fields.
-// Copyright (C) 2024 Paulo Rodrigues.
+// Copyright (C) 2024-2025 Paulo Rodrigues.
 
 // gtrace is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -26,27 +26,6 @@ const IR3field* vmec_b::get_magnetic_field() const {
   return magnetic_field_.get();
 }
 const metric_covariant* vmec_b::get_metric() const { return metric_.get(); }
-
-void vmec_b::print_help() {
-  std::string help_message =
-      "field_box -> gtrace::vmec_b\n"
-      "Usage: gtrace link_options -- [...] [vmec_b options] netcdf_file\n"
-      "\n"
-      "Sets a gyronimo::equilibrium_vmec object (and its dependencies) by\n"
-      "reading the vmec produced netcdf_file (mandatory argument).\n"
-      "Options:\n"
-      "  -cached   Builds a level-1 cached version of the objects\n"
-      "            gyronimo::{equilibrium_vmec, metric_vmec, morphism_vmec}.\n"
-      "            It may improve performance, but not necessarily so.\n"
-      "Other options (actually the gyronimo::morphism_vmec settings):\n"
-      "  -abstol=, -reltol=\n"
-      "            Absolute and relative tolerances (default 1e-12).\n"
-      "  -iterations=\n"
-      "            Number of iterations (default 10).\n"
-      "  -test-residue\n"
-      "            Tests residual value, not the solution delta (default).\n";
-  std::cout << help_message << std::endl;
-}
 
 vmec_b::vmec_b(const argh::parser& argh_line)
     : ifactory_(new cubic_gsl_factory()) {

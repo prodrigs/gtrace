@@ -1,5 +1,5 @@
 // gtrace -- a flexible gyron-tracing application for electromagnetic fields.
-// Copyright (C) 2024 Paulo Rodrigues.
+// Copyright (C) 2024-2025 Paulo Rodrigues.
 
 // gtrace is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -21,9 +21,20 @@
 
 #include <gtrace/boxes/driver_box.hh>
 
+/*!
+Integration of a single gyron's orbit.
+--------------------------------------
+
+Sets up the `pusher_box_t`, `field_box_t`, and `observer_box_t` objects required
+to follow a single gyron (ie, particle, guiding centre, etc). The actual type of
+gyron to be traced is defined by the state type of the invoked `pusher_box_t`.
+
+Driver options:
+
+ + `-tfinal=val` Time-integration limit (default 1, in `pusher_box_t` units).
+!*/
 class single_gyron : public driver_box_t {
  public:
-  static void print_help();
   single_gyron(int argc, char* argv[]) : driver_box_t(argc, argv) {};
   virtual ~single_gyron() {};
   virtual int operator()(int argc, char* argv[]) const;

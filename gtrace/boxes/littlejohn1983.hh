@@ -1,5 +1,5 @@
 // gtrace -- a flexible gyron-tracing application for electromagnetic fields.
-// Copyright (C) 2024 Paulo Rodrigues.
+// Copyright (C) 2024-2025 Paulo Rodrigues.
 
 // gtrace is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -29,6 +29,45 @@
 
 using gyronimo::guiding_centre;
 
+/*!
+Pusher for guiding-centre motion powered by `boost::odeint` algorithms.
+-----------------------------------------------------------------------
+
+Sets up a `gyronimo::guiding_centre object` (and its dependencies) to be traced
+along an electromagnetic field defined by some `field_box_t` object employing an
+available [`boost::odeint`](https://www.boost.org) algorithm for ODE
+integration. By default, the overriden virtual method
+`pusher_box_t::print_state(time)` prints to the output stream the time and
+contents of `littlejohn1983::state_t` (no newline). This can be tailored by
+additional output flags.
+
+Pusher options:
+
+ + `-lref=val, -vref=val`\
+    Reference length and velocity for normalisation (in SI units, default 1).
+
+ + `-mass=val, -charge=val`\
+    Particle mass and charge (in m_proton and q_proton, default 1).
+
+ + `-qu=val, -qv=val, -qw=val`\
+    Initial position in the coordinate system and units as defined by the
+    respective `field_box_t` object.
+
+ + `-energy=val, -gyrophase=val, -pitch=val`\
+    Initial kinetic energy (eV), gyrophase (rad), and pitch (ie., the ratio
+    $v_\parallel/v$).
+
+ + `-samples=val` Number of time samples (`tfinal/time_step`, default 512).
+ + `-odeint={adams|fehlberg|rungekutta}` ODE algorithm (defaults to rungekutta).
+
+Options controlling the output:
+
+ + `-pb` Magnetic-field norm (normalised to 'gyronimo::IR3field::m_factor').
+ + `-phires` Turns on high-resolution (16 digits) scientific format.
+ + `-pjac` Jacobian (ie, $\sqrt{\det(g)}$ of the coordinate system.
+ + `-pkin` Parallel and perpendicular energy (normalised to `mass*vref^2/2').
+ + `-pxyz` Cartesian position (SI, for connected metrics only).
+!*/
 class littlejohn1983 : public pusher_box_t {
  public:
   using state_t = guiding_centre::state;
@@ -40,7 +79,6 @@ class littlejohn1983 : public pusher_box_t {
     std::string odeint;
   };
   static settings_t parse_settings(const argh::parser& argh_line);
-  static void print_help();
 
   littlejohn1983(const settings_t& settings, const field_box_t* field_box);
   virtual ~littlejohn1983() {};

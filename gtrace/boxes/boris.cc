@@ -1,5 +1,5 @@
 // gtrace -- a flexible gyron-tracing application for electromagnetic fields.
-// Copyright (C) 2024 Paulo Rodrigues.
+// Copyright (C) 2024-2025 Paulo Rodrigues.
 
 // gtrace is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -87,37 +87,6 @@ void boris::print_header() const {
     std::cout.setf(std::ios::scientific);
   }
   std::cout << "\n";
-}
-
-void boris::print_help() {
-  std::string help_message =
-      "pusher_box -> gtrace::boris\n"
-      "Usage: gtrace link_options -- [...] [boris options] [...]\n"
-      "\n"
-      "Sets up a gyronimo::classical_boris object (and all its dependencies)\n"
-      "in order to push a charged particle under the Lorentz force due to the\n"
-      "electromagnetic field defined some field_box (the -f link option). By\n"
-      "default, the virtual method pusher_box::print_state(time) sends to\n"
-      "stdout the time and the contents of boris::state_t (no newline).\n"
-      "This can be tailored by additional output flags.\n"
-      "Options:\n"
-      "  -lref=    Reference length (in SI, default 1).\n"
-      "  -vref=    Reference velocity (in SI, default 1).\n"
-      "  -mass=    Particle mass (in m_proton, default 1).\n"
-      "  -charge=  Particle charge (in q_proton, default 1).\n"
-      "  -qu=, -qv=, -qw=\n"
-      "            Initial position in the coordinates and units defined by\n"
-      "            the respective field_box object.\n"
-      "  -energy=, -gyrophase=, -pitch=\n"
-      "            Initial energy (eV), gyrophase (rad), and pitch (v_par/v).\n"
-      "  -samples= Number of time samples (tfinal/time_step, default 512).\n"
-      "Options controlling the output:\n"
-      "  -pb       Magnetic-field norm (in gyronimo::IR3field::m_factor).\n"
-      "  -phires   Turns on high-resolution (16 digits) scientific format.\n"
-      "  -pjac     Jacobian (ie, sqrt(det(g))) of the coordinate system.\n"
-      "  -pkin     Parallel and perpendicular energy (in si mass*vref^2/2).\n"
-      "  -pxyz     Cartesian position (si).\n";
-  std::cout << help_message << std::endl;
 }
 
 void boris::print_state(double time) const {
