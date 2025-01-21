@@ -78,11 +78,8 @@ ensemble_async_mpi::stream_redirector<StreamType>::stream_redirector(
     StreamType& passive, const std::string& filename)
     : passive_stream_(passive) {
   active_stream_.open(filename);
-  if (!active_stream_.is_open()) {
-    std::cerr << "gtrace::ensemble_async_mpi: cannot open file \"" << filename
-              << "\" for writing." << std::endl;
-    std::exit(1);
-  }
+  if (!active_stream_.is_open())
+    throw std::runtime_error("cannot write to file " + filename + ".\n");
   stored_passive_buffer_ = passive_stream_.rdbuf();
   passive_stream_.rdbuf(active_stream_.rdbuf());
 }

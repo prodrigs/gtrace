@@ -52,9 +52,7 @@ odeint_stepper<EqSystem>* odeint_stepper_factory(
     return new stepper_wrapper<runge_kutta_fehlberg78<state_t>, EqSystem>;
   if (stepper_name == "rungekutta")
     return new stepper_wrapper<runge_kutta4<state_t>, EqSystem>;
-  std::cerr << "gtrace::odeint_stepper_factory: unsupported stepper "
-            << stepper_name << ".\n";
-  std::exit(1);
+  throw std::runtime_error("unsupported odeint stepper.");
   return nullptr;
 }
 

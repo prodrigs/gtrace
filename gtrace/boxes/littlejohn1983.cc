@@ -49,11 +49,7 @@ IR3 littlejohn1983::get_q(double time) const {
 bool littlejohn1983::is_pxyz_inconsistent(
     const settings_t& s, const field_box_t* fb) {
   using gyronimo::metric_connected;
-  if (!s.pxyz || dynamic_cast<const metric_connected*>(fb->get_metric()))
-    return false;
-  std::cerr << "gtrace::littlejohn1983: "
-            << "inconsistent -pxyz and non-connected metric.\n";
-  return true;
+  return s.pxyz && !(dynamic_cast<const metric_connected*>(fb->get_metric()));
 }
 
 littlejohn1983::littlejohn1983(const settings_t& s, const field_box_t* fb)
@@ -64,7 +60,8 @@ littlejohn1983::littlejohn1983(const settings_t& s, const field_box_t* fb)
           s.lref, s.vref, s.charge / s.mass, get_mu_tilde(s, fb),
           dynamic_cast<const gyronimo::IR3field_c1*>(fb->get_magnetic_field()),
           fb->get_electric_field()) {
-  if (is_pxyz_inconsistent(s, fb)) std::exit(1);
+  if (is_pxyz_inconsistent(s, fb))
+    throw std::runtime_error("inconsistent -pxyz and non-connected metric.");
   IR3 q_initial = {s.qu, s.qv, s.qw};
   state_ = eqs_motion_.generate_state(
       q_initial, get_energy_tilde(s),

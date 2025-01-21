@@ -41,7 +41,6 @@ int ensemble_async_mpi::operator()(int argc, char* argv[]) const {
   for (std::string private_options; std::getline(in_stream, private_options);) {
     auto full_argh = argh::parser(shared_options + private_options);
     std::unique_ptr<field_box_t> field {create_linked_field_box(full_argh)};
-    // consistent metric?
     std::unique_ptr<pusher_box_t> pusher {
         create_linked_pusher_box(full_argh, field.get())};
     std::unique_ptr<observer_box_t> observer {
@@ -68,10 +67,7 @@ std::pair<std::ifstream, std::string> ensemble_async_mpi::get_input_stream(
   argh_line("prefix", "") >> filename;
   filename += "-" + std::to_string(mpi_rank);
   std::ifstream in_stream(filename);
-  if (!in_stream.is_open()) {
-    std::cerr << "gtrace::ensemble_async_mpi: cannot open file \"" << filename
-              << "\" for reading." << std::endl;
-    std::exit(1);
-  }
+  if (!in_stream.is_open())
+    throw std::runtime_error("cannot read from file " + filename + ".\n");
   return {std::move(in_stream), filename};
 }
