@@ -92,7 +92,7 @@ class littlejohn1983 : public pusher_box_t {
   const double time_step_;
   const settings_t settings_;
   const guiding_centre eqs_motion_;
-  const std::unique_ptr<const field_box_t> field_box_;
+  const field_box_t* field_box_;
   const std::unique_ptr<odeint_stepper<guiding_centre>> stepper_;
   state_t state_;
 

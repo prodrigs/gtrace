@@ -21,7 +21,6 @@
 
 #include <gyronimo/dynamics/classical_boris.hh>
 
-#include <gtrace/boxes/field_box.hh>
 #include <gtrace/boxes/pusher_box.hh>
 
 #include <memory>
@@ -87,7 +86,7 @@ class boris : public pusher_box_t {
   const double time_step_;
   const settings_t settings_;
   const classical_boris stepper_;
-  const std::unique_ptr<const field_box_t> field_box_;
+  const field_box_t* field_box_;
   state_t state_;
   void print_header() const;
   IR3 initial_velocity_from_energy_data() const;

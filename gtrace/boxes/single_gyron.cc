@@ -24,7 +24,9 @@
 int single_gyron::operator()(int argc, char* argv[]) const {
   auto argh_line = this->argh_line();
   this->print_header(argc, argv);
-  std::unique_ptr<pusher_box_t> pusher {create_linked_pusher_box(argh_line)};
+  std::unique_ptr<field_box_t> field {create_linked_field_box(argh_line)};
+  std::unique_ptr<pusher_box_t> pusher {
+      create_linked_pusher_box(argh_line, field.get())};
   std::unique_ptr<observer_box_t> observer {
       create_linked_observer_box(argh_line)};
 

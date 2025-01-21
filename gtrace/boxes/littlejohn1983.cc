@@ -57,7 +57,8 @@ bool littlejohn1983::is_pxyz_inconsistent(
 }
 
 littlejohn1983::littlejohn1983(const settings_t& s, const field_box_t* fb)
-    : settings_(s), time_step_(s.time_final / s.samples), field_box_(fb),
+    : pusher_box_t(fb), settings_(s), time_step_(s.time_final / s.samples),
+      field_box_(fb),
       stepper_(odeint_stepper_factory<guiding_centre>(s.odeint)),
       eqs_motion_(
           s.lref, s.vref, s.charge / s.mass, get_mu_tilde(s, fb),
@@ -121,8 +122,7 @@ void littlejohn1983::print_state(double time) const {
   if (settings_.pkin)
     std::cout << " " << eqs_motion_.energy_parallel(state_) << " "
               << eqs_motion_.energy_perpendicular(state_, time);
-  const field_box_t* fb = field_box_.get();
   if (settings_.pb)
-    std::cout << " " << fb->get_magnetic_field()->magnitude(q, time);
-  if (settings_.pjac) std::cout << " " << fb->get_metric()->jacobian(q);
+    std::cout << " " << field_box_->get_magnetic_field()->magnitude(q, time);
+  if (settings_.pjac) std::cout << " " << field_box_->get_metric()->jacobian(q);
 }

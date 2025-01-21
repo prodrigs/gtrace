@@ -1,5 +1,5 @@
 // gtrace -- a flexible gyron-tracing application for electromagnetic fields.
-// Copyright (C) 2024-2025 Paulo Rodrigues.
+// Copyright (C) 2025 Paulo Rodrigues.
 
 // gtrace is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -14,14 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with gtrace. If not, see <https://www.gnu.org/licenses/>.
 
-// @factories/boris.cc, this file is part of gtrace.
+// @boxes/pusher_box.cc, this file is part of gtrace.
 
-#include <gtrace/boxes/boris.hh>
+#include <gtrace/boxes/pusher_box.hh>
 
-#include <iostream>
-
-pusher_box_t* create_linked_pusher_box(
-    const argh::parser& argh_line, const field_box_t* field_box) {
-  boris::settings_t settings = boris::parse_settings(argh_line);
-  return new boris(settings, field_box);
+pusher_box_t::pusher_box_t(const field_box_t* field_box) {
+  if (!field_box) throw std::invalid_argument("empty field_box_t.");
+  if (!field_box->is_metric_consistent())
+    throw std::runtime_error("inconsistent metrics in field_box_t.");
 }

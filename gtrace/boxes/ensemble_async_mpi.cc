@@ -40,7 +40,10 @@ int ensemble_async_mpi::operator()(int argc, char* argv[]) const {
 
   for (std::string private_options; std::getline(in_stream, private_options);) {
     auto full_argh = argh::parser(shared_options + private_options);
-    std::unique_ptr<pusher_box_t> pusher {create_linked_pusher_box(full_argh)};
+    std::unique_ptr<field_box_t> field {create_linked_field_box(full_argh)};
+    // consistent metric?
+    std::unique_ptr<pusher_box_t> pusher {
+        create_linked_pusher_box(full_argh, field.get())};
     std::unique_ptr<observer_box_t> observer {
         create_linked_observer_box(full_argh)};
 

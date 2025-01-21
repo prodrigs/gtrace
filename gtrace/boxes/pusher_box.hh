@@ -1,5 +1,5 @@
 // gtrace -- a flexible gyron-tracing application for electromagnetic fields.
-// Copyright (C) 2024 Paulo Rodrigues.
+// Copyright (C) 2024-2025 Paulo Rodrigues.
 
 // gtrace is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -21,12 +21,15 @@
 
 #include <gyronimo/core/IR3algebra.hh>
 
+#include <gtrace/boxes/field_box.hh>
 #include <gtrace/tools/argh.h>
 
 using gyronimo::IR3;
 
 class pusher_box_t {
  public:
+  pusher_box_t() = delete;
+  pusher_box_t(const field_box_t* field_box);
   virtual ~pusher_box_t() {};
   virtual IR3 get_q(double time) const = 0;
   virtual IR3 get_dot_q(double time) const = 0;
@@ -34,6 +37,7 @@ class pusher_box_t {
   virtual double push_state(double time) = 0;
 };
 
-pusher_box_t* create_linked_pusher_box(const argh::parser& command_line);
+pusher_box_t* create_linked_pusher_box(
+    const argh::parser& command_line, const field_box_t* field_box);
 
 #endif  // GTRACE_PUSHER_BOX

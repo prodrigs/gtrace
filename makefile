@@ -73,6 +73,7 @@ boxes/ensemble_async_mpi.o: boxes/ensemble_async_mpi.cc \
 boxes/littlejohn1983.o: boxes/littlejohn1983.cc \
   littlejohn1983.hh field_box.hh pusher_box.hh \
   odeint_stepper.hh odeint_wrapper.hh | boxes
+boxes/pusher_box.o: boxes/pusher_box.cc pusher_box.hh | boxes
 boxes/q_predicate.o: boxes/q_predicate.cc \
   q_predicate.hh step_printer.hh observer_box.hh | boxes
 boxes/single_gyron.o: boxes/single_gyron.cc \

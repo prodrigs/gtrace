@@ -20,16 +20,8 @@
 
 #include <iostream>
 
-pusher_box_t* create_linked_pusher_box(const argh::parser& argh_line) {
-  field_box_t* field_box = create_linked_field_box(argh_line);
-  if (!field_box) {
-    std::cerr << "gtrace::littlejohn1983: empty box, nothing to be done.\n";
-    return nullptr;
-  }
-  if (!field_box->is_metric_consistent()) {
-    std::cerr << "gtrace::littlejohn1983: inconsistent field box." << std::endl;
-    return nullptr;
-  }
+pusher_box_t* create_linked_pusher_box(
+    const argh::parser& argh_line, const field_box_t* field_box) {
   littlejohn1983::settings_t settings =
       littlejohn1983::parse_settings(argh_line);
   return new littlejohn1983(settings, field_box);
