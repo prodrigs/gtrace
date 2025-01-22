@@ -18,6 +18,7 @@
 
 #include <gtrace/boxes/q_predicate.hh>
 
-observer_box_t* create_linked_observer_box(const argh::parser& argh_line) {
-  return new q_predicate(argh_line);
+observer_box_t* create_linked_observer_box(
+    const argh::parser& argh_line, std::ostream& os) {
+  return new q_predicate(argh_line, os);
 }

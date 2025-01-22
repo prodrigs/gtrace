@@ -28,9 +28,13 @@ Integration of a single gyron's orbit.
 Sets up the `pusher_box_t`, `field_box_t`, and `observer_box_t` objects required
 to follow a single gyron (ie, particle, guiding centre, etc). The actual type of
 gyron to be traced is defined by the state type of the invoked `pusher_box_t`.
+Any output produced by the required `observer_box_t` is redirected to
+`std::cout`.
 
 Driver options:
 
+ + `-elapsed` Prints the elapsed time for each orbit (defaults to no print).
+ + `-sci-16` Turns on 16-digit scientific format for numeric output.
  + `-tfinal=val` Time-integration limit (default 1, in `pusher_box_t` units).
 !*/
 class single_gyron : public driver_box_t {

@@ -21,7 +21,7 @@
 
 #include <gtrace/boxes/boris.hh>
 
-#include <iostream>
+#include <algorithm>
 
 boris::boris(const settings_t& s, const field_box_t* field_box)
     : pusher_box_t(field_box), settings_(s),
@@ -33,7 +33,34 @@ boris::boris(const settings_t& s, const field_box_t* field_box)
   IR3 q_initial = {settings_.qu, settings_.qv, settings_.qw};
   IR3 v_initial = this->initial_velocity_from_energy_data();
   state_ = stepper_.half_back_step(q_initial, v_initial, 0.0, time_step_);
-  this->print_header();
+}
+
+std::string boris::compose_output_fields() const {
+  std::string output_fields("# fields: t qu qv qw vx vy vz");
+  if (settings_.pxyz) output_fields += " x y z";
+  if (settings_.pkin) output_fields += " Epar Eperp";
+  if (settings_.pb) output_fields += " B";
+  if (settings_.pjac) output_fields += " jac";
+  return output_fields;
+}
+
+std::list<double> boris::compose_output_values(double time) const {
+  using std::ranges::copy;
+  std::list<double> output_values(1, time);
+  copy(state_, std::back_inserter(output_values));
+  IR3 q = stepper_.get_position(state_);
+  if (settings_.pxyz)
+    copy((*stepper_.my_morphism())(q), std::back_inserter(output_values));
+  if (settings_.pkin) {
+    output_values.push_back(stepper_.energy_parallel(state_, time));
+    output_values.push_back(stepper_.energy_perpendicular(state_, time));
+  }
+  if (settings_.pb)
+    output_values.push_back(
+        field_box_->get_magnetic_field()->magnitude(q, time));
+  if (settings_.pjac)
+    output_values.push_back(field_box_->get_metric()->jacobian(q));
+  return output_values;
 }
 
 IR3 boris::get_dot_q(double time) const { return stepper_.get_dot_q(state_); }
@@ -42,8 +69,7 @@ IR3 boris::get_q(double time) const { return stepper_.get_position(state_); }
 
 IR3 boris::initial_velocity_from_energy_data() const {
   using gyronimo::aligned_frame;
-  using gyronimo::codata::e;
-  using gyronimo::codata::m_proton;
+  using gyronimo::codata::e, gyronimo::codata::m_proton;
   aligned_frame frame(stepper_.magnetic_field());
   const double energy_ref_ev =
       0.5 * m_proton * settings_.mass * settings_.vref * settings_.vref / e;
@@ -70,38 +96,10 @@ boris::settings_t boris::parse_settings(const argh::parser& argh_line) {
   argh_line("pitch", 0.5) >> settings.pitch;
   argh_line("gyrophase", 0) >> settings.gyrophase;
   settings.pb = argh_line["pb"];
-  settings.phires = argh_line["phires"];
   settings.pjac = argh_line["pjac"];
   settings.pkin = argh_line["pkin"];
   settings.pxyz = argh_line["pxyz"];
   return settings;
-}
-
-void boris::print_header() const {
-  std::cout << "# fields: t qu qv qw vx vy vz";
-  if (settings_.pxyz) std::cout << " x y z";
-  if (settings_.pkin) std::cout << " Epar Eperp";
-  if (settings_.pb) std::cout << " B";
-  if (settings_.pjac) std::cout << " jac";
-  if (settings_.phires) {
-    std::cout.precision(16);
-    std::cout.setf(std::ios::scientific);
-  }
-  std::cout << "\n";
-}
-
-void boris::print_state(double time) const {
-  std::cout << time;
-  for (auto s : state_) std::cout << " " << s;
-  IR3 q = stepper_.get_position(state_);
-  if (settings_.pxyz)
-    for (auto s : (*stepper_.my_morphism())(q)) std::cout << " " << s;
-  if (settings_.pkin)
-    std::cout << " " << stepper_.energy_parallel(state_, time) << " "
-              << stepper_.energy_perpendicular(state_, time);
-  if (settings_.pb)
-    std::cout << " " << field_box_->get_magnetic_field()->magnitude(q, time);
-  if (settings_.pjac) std::cout << " " << field_box_->get_metric()->jacobian(q);
 }
 
 double boris::push_state(double time) {

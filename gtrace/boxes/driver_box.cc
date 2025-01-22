@@ -21,12 +21,24 @@
 #include <gtrace/boxes/driver_box.hh>
 
 #include <chrono>
-#include <iostream>
+#include <sstream>
 
 driver_box_t::driver_box_t(int argc, char* argv[])
     : argh_line_(argh::parser(argc, argv)) {}
 
-void driver_box_t::integrate_orbit(
+std::string driver_box_t::header_string(int argc, char* argv[]) {
+  std::ostringstream header;
+  header << "# gtrace -- a flexible gyron-tracing application "
+         << "for electromagnetic fields.\n"
+         << "# powered by ::gyronimo::v" << gyronimo::version_major << "."
+         << gyronimo::version_minor << "." << gyronimo::version_patch
+         << " (git-commit:" << gyronimo::git_commit_hash << ").\n";
+  header << "# args: ";
+  for (int i = 1; i < argc; i++) header << argv[i] << " ";
+  return header.str();
+}
+
+std::string driver_box_t::integrate_orbit(
     pusher_box_t* pusher, const observer_box_t* observer, double tfinal) const {
   auto tick_0 = std::chrono::steady_clock::now();
   double time = 0;
@@ -34,22 +46,8 @@ void driver_box_t::integrate_orbit(
     time = pusher->push_state(time);
   auto tick_1 = std::chrono::steady_clock::now();
   if (argh_line_["peek-beyond-tfinal"]) (*observer)(pusher, time);
-  if (argh_line_["elapsed"])
-    std::cout << "# elapsed time: "
-              << std::chrono::duration<double>(tick_1 - tick_0) << std::endl;
-}
-
-void driver_box_t::print_header(int argc, char* argv[]) {
-  using gyronimo::git_commit_hash;
-  using gyronimo::version_major;
-  using gyronimo::version_minor;
-  using gyronimo::version_patch;
-  std::cout << "# gtrace -- a flexible gyron-tracing application "
-            << "for electromagnetic fields.\n"
-            << "# powered by ::gyronimo::v" << version_major << "."
-            << version_minor << "." << version_patch
-            << " (git-commit:" << git_commit_hash << ").\n";
-  std::cout << "# args: ";
-  for (int i = 1; i < argc; i++) std::cout << argv[i] << " ";
-  std::cout << std::endl;
+  std::ostringstream elapsed_time_line;
+  elapsed_time_line << "# elapsed time: "
+                    << std::chrono::duration<double>(tick_1 - tick_0);
+  return elapsed_time_line.str();
 }

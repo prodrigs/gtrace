@@ -61,7 +61,6 @@ Pusher options:
 Options controlling the output:
 
  + `-pb` Magnetic-field norm (in `gyronimo::IR3field::m_factor` units).
- + `-phires` Turns on high-resolution (16 digits) scientific format.
  + `-pjac` Jacobian (ie, $\sqrt{\det(g)}$ of the coordinate system.
  + `-pkin` Parallel and perpendicular energy (in si `mass*vref^2/2`).
  + `-pxyz` Cartesian position (SI).
@@ -73,15 +72,16 @@ class boris : public pusher_box_t {
     size_t samples;
     double charge, lref, mass, time_final, vref;
     double qu, qv, qw, energy, gyrophase, pitch;
-    bool pb, phires, pjac, pkin, pxyz;
+    bool pb, pjac, pkin, pxyz;
   };
   static settings_t parse_settings(const argh::parser& argh_line);
   boris(const settings_t& settings, const field_box_t* field_box);
   virtual ~boris() {};
+  virtual double push_state(double time) override;
   virtual IR3 get_dot_q(double time) const override;
   virtual IR3 get_q(double time) const override;
-  virtual void print_state(double time) const override;
-  virtual double push_state(double time) override;
+  virtual std::string compose_output_fields() const override;
+  virtual std::list<double> compose_output_values(double time) const override;
  private:
   const double time_step_;
   const settings_t settings_;

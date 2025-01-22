@@ -47,48 +47,21 @@ pusher, field, and observer boxes are replicated by each process.
 
 Driver options:
 
+ + `-elapsed` Prints the elapsed time for each orbit (defaults to no print).
  + `-prefix=name` Prefix of input & output filenames.
+ + `-sci-16` Turns on 16-digit scientific format for numeric output.
  + `-tfinal=val` Time-integration limit (default 1, in `pusher_box_t` units).
 !*/
 class ensemble_async_mpi : public driver_box_t {
  public:
-  template<class StreamType> class stream_redirector;
   ensemble_async_mpi(int argc, char* argv[]);
   virtual ~ensemble_async_mpi();
   virtual int operator()(int argc, char* argv[]) const;
  private:
   int mpi_rank_, mpi_size_;
   std::string convert_argv_to_string(char* argv[]) const;
-  std::pair<std::ifstream, std::string> get_input_stream(
+  std::pair<std::ifstream, std::ofstream> get_io_streams(
       const argh::parser& argh_line, int mpi_rank) const;
 };
-
-template<class StreamType> class ensemble_async_mpi::stream_redirector {
- public:
-  stream_redirector(StreamType& passive, const std::string& filename);
-  ~stream_redirector();
- private:
-  std::ofstream active_stream_;
-  StreamType& passive_stream_;
-  std::streambuf* stored_passive_buffer_ = nullptr;
-};
-
-template<class StreamType>
-ensemble_async_mpi::stream_redirector<StreamType>::stream_redirector(
-    StreamType& passive, const std::string& filename)
-    : passive_stream_(passive) {
-  active_stream_.open(filename);
-  if (!active_stream_.is_open())
-    throw std::runtime_error("cannot write to file " + filename + ".\n");
-  stored_passive_buffer_ = passive_stream_.rdbuf();
-  passive_stream_.rdbuf(active_stream_.rdbuf());
-}
-
-template<class StreamType>
-ensemble_async_mpi::stream_redirector<StreamType>::~stream_redirector() {
-  active_stream_.flush();
-  active_stream_.close();
-  passive_stream_.rdbuf(stored_passive_buffer_);
-}
 
 #endif  // GTRACE_ENSEMBLE_ASYNC_MPI

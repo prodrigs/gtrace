@@ -22,16 +22,23 @@
 #include <memory>
 
 int single_gyron::operator()(int argc, char* argv[]) const {
-  auto argh_line = this->argh_line();
-  this->print_header(argc, argv);
-  std::unique_ptr<field_box_t> field {create_linked_field_box(argh_line)};
+  std::unique_ptr<field_box_t> field {create_linked_field_box(argh_line_)};
   std::unique_ptr<pusher_box_t> pusher {
-      create_linked_pusher_box(argh_line, field.get())};
+      create_linked_pusher_box(argh_line_, field.get())};
   std::unique_ptr<observer_box_t> observer {
-      create_linked_observer_box(argh_line)};
+      create_linked_observer_box(argh_line_, std::cout)};
+
+  std::cout << this->header_string(argc, argv) << "\n"
+            << pusher->compose_output_fields() << "\n";
+  if (argh_line_["sci-16"]) {
+    std::cout.precision(16);
+    std::cout.setf(std::ios::scientific);
+  }
 
   double time_final;
-  argh_line("tfinal", 1) >> time_final;
-  this->integrate_orbit(pusher.get(), observer.get(), time_final);
+  argh_line_("tfinal", 1) >> time_final;
+  std::string elapsed_time_info =
+      this->integrate_orbit(pusher.get(), observer.get(), time_final);
+  if (argh_line_["elapsed-time"]) std::cout << elapsed_time_info << "\n";
   return 0;
 }

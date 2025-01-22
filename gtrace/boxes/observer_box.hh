@@ -23,10 +23,15 @@
 
 class observer_box_t {
  public:
+  observer_box_t() = delete;
+  observer_box_t(std::ostream& os) : ostream_(os) {};
   virtual ~observer_box_t() {};
   virtual bool operator()(const pusher_box_t* pusher, double time) const = 0;
+ protected:
+  std::ostream& ostream_;
 };
 
-observer_box_t* create_linked_observer_box(const argh::parser& argh_line);
+observer_box_t* create_linked_observer_box(
+    const argh::parser& argh_line, std::ostream& os);
 
 #endif  // GTRACE_OBSERVER_BOX

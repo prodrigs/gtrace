@@ -44,7 +44,8 @@ Observer options:
 !*/
 class q_predicate : public observer_box_t {
  public:
-  q_predicate(const argh::parser& argh_line);
+  q_predicate() = delete;
+  q_predicate(const argh::parser& argh_line, std::ostream& os);
   virtual ~q_predicate() {};
   virtual bool operator()(
       const pusher_box_t* pusher, double time) const override;

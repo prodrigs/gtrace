@@ -23,28 +23,29 @@
 #include <gtrace/boxes/pusher_box.hh>
 #include <gtrace/tools/argh.h>
 
+#include <string>
+
 /*!
 Base class for gyron-integration drivers.
 -----------------------------------------
 
 Options:
 
- + `-elapsed` Prints the elapsed time for each orbit (defaults to no print).
  + `-peek-beyond-tfinal`\
     Invokes the observer also on the state that is pushed one time step beyond
     the integration limit `tfinal`.
 !*/
 class driver_box_t {
  public:
-  static void print_header(int argc, char* argv[]);
+  static std::string header_string(int argc, char* argv[]);
+  driver_box_t() = delete;
   driver_box_t(int argc, char* argv[]);
   virtual ~driver_box_t() {};
   virtual int operator()(int argc, char* argv[]) const = 0;
-  const argh::parser& argh_line() const { return argh_line_; };
-  virtual void integrate_orbit(
+  virtual std::string integrate_orbit(
       pusher_box_t* pusher, const observer_box_t* observer,
       double tfinal) const;
- private:
+ protected:
   const argh::parser argh_line_;
 };
 

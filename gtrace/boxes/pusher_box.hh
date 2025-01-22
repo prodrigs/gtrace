@@ -24,6 +24,8 @@
 #include <gtrace/boxes/field_box.hh>
 #include <gtrace/tools/argh.h>
 
+#include <list>
+
 using gyronimo::IR3;
 
 class pusher_box_t {
@@ -31,10 +33,11 @@ class pusher_box_t {
   pusher_box_t() = delete;
   pusher_box_t(const field_box_t* field_box);
   virtual ~pusher_box_t() {};
+  virtual double push_state(double time) = 0;
   virtual IR3 get_q(double time) const = 0;
   virtual IR3 get_dot_q(double time) const = 0;
-  virtual void print_state(double time) const = 0;
-  virtual double push_state(double time) = 0;
+  virtual std::string compose_output_fields() const = 0;
+  virtual std::list<double> compose_output_values(double time) const = 0;
 };
 
 pusher_box_t* create_linked_pusher_box(

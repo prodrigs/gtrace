@@ -22,7 +22,39 @@
 #include <gtrace/boxes/littlejohn1983.hh>
 #include <gtrace/tools/odeint_wrapper.hh>
 
-#include <iostream>
+#include <algorithm>
+
+std::string littlejohn1983::compose_output_fields() const {
+  std::string output_fields("# fields: t qu qv qw vpar");
+  if (settings_.pxyz) output_fields += " x y z";
+  if (settings_.pkin) output_fields += " Epar Eperp";
+  if (settings_.pb) output_fields += " B";
+  if (settings_.pjac) output_fields += " jac";
+  return output_fields;
+}
+
+std::list<double> littlejohn1983::compose_output_values(double time) const {
+  using std::ranges::copy;
+  std::list<double> output_values(1, time);
+  copy(state_, std::back_inserter(output_values));
+  IR3 q = eqs_motion_.get_position(state_);
+  if (settings_.pxyz) {
+    using gyronimo::metric_connected, gyronimo::morphism;
+    auto g = static_cast<const metric_connected*>(field_box_->get_metric());
+    const morphism& morph(*g->my_morphism());
+    copy(morph(q), std::back_inserter(output_values));
+  }
+  if (settings_.pkin) {
+    output_values.push_back(eqs_motion_.energy_parallel(state_));
+    output_values.push_back(eqs_motion_.energy_perpendicular(state_, time));
+  }
+  if (settings_.pb)
+    output_values.push_back(
+        field_box_->get_magnetic_field()->magnitude(q, time));
+  if (settings_.pjac)
+    output_values.push_back(field_box_->get_metric()->jacobian(q));
+  return output_values;
+}
 
 IR3 littlejohn1983::get_dot_q(double time) const {
   auto ds = eqs_motion_(state_, time);
@@ -66,7 +98,6 @@ littlejohn1983::littlejohn1983(const settings_t& s, const field_box_t* fb)
   state_ = eqs_motion_.generate_state(
       q_initial, get_energy_tilde(s),
       (s.pitch < 0 ? guiding_centre::minus : guiding_centre::plus), 0);
-  this->print_header();
 }
 
 littlejohn1983::settings_t littlejohn1983::parse_settings(
@@ -86,40 +117,8 @@ littlejohn1983::settings_t littlejohn1983::parse_settings(
   argh_line("gyrophase", 0) >> settings.gyrophase;
   argh_line("odeint", "rungekutta") >> settings.odeint;
   settings.pb = argh_line["pb"];
-  settings.phires = argh_line["phires"];
   settings.pjac = argh_line["pjac"];
   settings.pkin = argh_line["pkin"];
   settings.pxyz = argh_line["pxyz"];
   return settings;
-}
-
-void littlejohn1983::print_header() const {
-  std::cout << "# fields: t qu qv qw vpar";
-  if (settings_.pxyz) std::cout << " x y z";
-  if (settings_.pkin) std::cout << " Epar Eperp";
-  if (settings_.pb) std::cout << " B";
-  if (settings_.pjac) std::cout << " jac";
-  if (settings_.phires) {
-    std::cout.precision(16);
-    std::cout.setf(std::ios::scientific);
-  }
-  std::cout << "\n";
-}
-
-void littlejohn1983::print_state(double time) const {
-  std::cout << time;
-  for (auto s : state_) std::cout << " " << s;
-  IR3 q = eqs_motion_.get_position(state_);
-  if (settings_.pxyz) {
-    using gyronimo::metric_connected;
-    const metric_connected* mc =
-        static_cast<const metric_connected*>(field_box_->get_metric());
-    for (auto s : (*mc->my_morphism())(q)) std::cout << " " << s;
-  }
-  if (settings_.pkin)
-    std::cout << " " << eqs_motion_.energy_parallel(state_) << " "
-              << eqs_motion_.energy_perpendicular(state_, time);
-  if (settings_.pb)
-    std::cout << " " << field_box_->get_magnetic_field()->magnitude(q, time);
-  if (settings_.pjac) std::cout << " " << field_box_->get_metric()->jacobian(q);
 }

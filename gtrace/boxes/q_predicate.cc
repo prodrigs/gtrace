@@ -25,7 +25,8 @@ bool q_predicate::invoke_default(
     const pusher_box_t* pusher, double time) const {
   IR3 q = pusher->get_q(time);
   if (this->is_within_bounds(q)) {
-    if (time == 0) pusher->print_state(time);
+    if (time == 0)
+      for (auto x : pusher->compose_output_values(time)) ostream_ << x << " ";
     if (time >= tfinal_) this->print_last_state(pusher, time);
     return true;
   } else {
@@ -54,14 +55,15 @@ bool q_predicate::operator()(const pusher_box_t* pusher, double time) const {
 
 void q_predicate::print_last_state(
     const pusher_box_t* pusher, double time) const {
-  std::cout << " ";
-  pusher->print_state(time);
-  std::cout << "\n";
+  for (auto x : pusher->compose_output_values(time)) ostream_ << x << " ";
+  ostream_ << "\n";
 }
 
-q_predicate::q_predicate(const argh::parser& argh_line)
-    : step_printer_(nullptr), is_step_mode_(argh_line["step-mode"]) {
-  if (is_step_mode_) step_printer_ = std::make_unique<step_printer>(argh_line);
+q_predicate::q_predicate(const argh::parser& argh_line, std::ostream& os)
+    : observer_box_t(os), step_printer_(nullptr),
+      is_step_mode_(argh_line["step-mode"]) {
+  if (is_step_mode_)
+    step_printer_ = std::make_unique<step_printer>(argh_line, os);
   argh_line("qumin", std::numeric_limits<double>::lowest()) >> qu_min_;
   argh_line("qumax", std::numeric_limits<double>::max()) >> qu_max_;
   argh_line("tfinal", 1) >> tfinal_;

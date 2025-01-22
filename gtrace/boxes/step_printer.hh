@@ -37,7 +37,8 @@ Observer options:
 !*/
 class step_printer : public observer_box_t {
  public:
-  step_printer(const argh::parser& argh_line);
+  step_printer() = delete;
+  step_printer(const argh::parser& argh_line, std::ostream& os);
   virtual ~step_printer() {};
   virtual bool operator()(
       const pusher_box_t* pusher, double time) const override;
