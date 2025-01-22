@@ -1,5 +1,5 @@
 // gtrace -- a flexible gyron-tracing application for electromagnetic fields.
-// Copyright (C) 2024 Paulo Rodrigues.
+// Copyright (C) 2024-2025 Paulo Rodrigues.
 
 // gtrace is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -21,7 +21,7 @@
 #include <memory>
 
 int main(int argc, char* argv[]) {
-  std::unique_ptr<driver_box_t> driver {create_linked_driver_box(argc, argv)};
+  auto driver = create_linked_driver_box(argc, argv);
   int return_code = (*driver)(argc, argv);
   return return_code;
 }

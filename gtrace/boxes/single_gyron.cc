@@ -22,11 +22,9 @@
 #include <memory>
 
 int single_gyron::operator()(int argc, char* argv[]) const {
-  std::unique_ptr<field_box_t> field {create_linked_field_box(argh_line_)};
-  std::unique_ptr<pusher_box_t> pusher {
-      create_linked_pusher_box(argh_line_, field.get())};
-  std::unique_ptr<observer_box_t> observer {
-      create_linked_observer_box(argh_line_, std::cout)};
+  auto field = create_linked_field_box(argh_line_);
+  auto pusher = create_linked_pusher_box(argh_line_, field.get());
+  auto observer = create_linked_observer_box(argh_line_, std::cout);
 
   std::cout << this->header_string(argc, argv) << "\n"
             << pusher->compose_output_fields() << "\n";

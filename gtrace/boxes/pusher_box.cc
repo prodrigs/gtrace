@@ -18,7 +18,8 @@
 
 #include <gtrace/boxes/pusher_box.hh>
 
-pusher_box_t::pusher_box_t(const field_box_t* field_box) {
+pusher_box_t::pusher_box_t(const field_box_t* field_box)
+    : field_box_(field_box) {
   if (!field_box) throw std::invalid_argument("empty field_box_t.");
   if (!field_box->is_metric_consistent())
     throw std::runtime_error("inconsistent metrics in field_box_t.");

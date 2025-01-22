@@ -27,18 +27,17 @@ const IR3field* vmec_b::get_magnetic_field() const {
 }
 const metric_covariant* vmec_b::get_metric() const { return metric_.get(); }
 
-vmec_b::vmec_b(const argh::parser& argh_line)
-    : ifactory_(new cubic_gsl_factory()) {
-  parser_ = std::make_unique<parser_vmec>(argh_line[1]);
+vmec_b::vmec_b(const argh::parser& arghs) : ifactory_(new cubic_gsl_factory()) {
+  parser_ = std::make_unique<parser_vmec>(arghs[1]);
 
   gyronimo::multiroot_c1::settings_t settings = {
       .method = gsl_multiroot_fdfsolver_newton,
-      .is_residual_tested = (argh_line["test-residue"] ? true : false)};
-  argh_line("iterations", 10) >> settings.iterations;
-  argh_line("abstol", 1e-12) >> settings.tolerance_abs;
-  argh_line("reltol", 1e-12) >> settings.tolerance_rel;
+      .is_residual_tested = (arghs["test-residue"] ? true : false)};
+  arghs("iterations", 10) >> settings.iterations;
+  arghs("abstol", 1e-12) >> settings.tolerance_abs;
+  arghs("reltol", 1e-12) >> settings.tolerance_rel;
 
-  if (argh_line["cached"]) {
+  if (arghs["cached"]) {
     using gyronimo::IR3field_c1_cache;
     using gyronimo::metric_cache, gyronimo::morphism_cache;
     morphism_ = std::make_unique<morphism_cache<morphism_vmec>>(

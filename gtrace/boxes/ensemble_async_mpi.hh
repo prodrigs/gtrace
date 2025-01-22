@@ -61,7 +61,7 @@ class ensemble_async_mpi : public driver_box_t {
   int mpi_rank_, mpi_size_;
   std::string convert_argv_to_string(char* argv[]) const;
   std::pair<std::ifstream, std::ofstream> get_io_streams(
-      const argh::parser& argh_line, int mpi_rank) const;
+      const argh::parser& arghs, int mpi_rank) const;
 };
 
 #endif  // GTRACE_ENSEMBLE_ASYNC_MPI

@@ -23,6 +23,8 @@
 
 #include <gtrace/tools/argh.h>
 
+#include <memory>
+
 using gyronimo::IR3field;
 using gyronimo::metric_covariant;
 
@@ -41,6 +43,6 @@ inline bool field_box_t::is_metric_consistent() const {
   return (E && B ? E->metric() == B->metric() : true);
 }
 
-field_box_t* create_linked_field_box(const argh::parser& command_line);
+std::unique_ptr<field_box_t> create_linked_field_box(const argh::parser& arghs);
 
 #endif  // GTRACE_FIELD_BOX

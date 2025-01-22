@@ -34,15 +34,12 @@ int ensemble_async_mpi::operator()(int argc, char* argv[]) const {
   auto [in_stream, out_stream] = this->get_io_streams(argh_line_, mpi_rank_);
   out_stream << this->header_string(argc, argv) << "\n";
 
-  auto shared_options = this->convert_argv_to_string(argv);
-
+  std::string shared_options = this->convert_argv_to_string(argv);
   for (std::string private_options; std::getline(in_stream, private_options);) {
-    auto full_argh = argh::parser(shared_options + private_options);
-    std::unique_ptr<field_box_t> field {create_linked_field_box(full_argh)};
-    std::unique_ptr<pusher_box_t> pusher {
-        create_linked_pusher_box(full_argh, field.get())};
-    std::unique_ptr<observer_box_t> observer {
-        create_linked_observer_box(full_argh, out_stream)};
+    auto full_arghs = argh::parser(shared_options + private_options);
+    auto field = create_linked_field_box(full_arghs);
+    auto pusher = create_linked_pusher_box(full_arghs, field.get());
+    auto observer = create_linked_observer_box(full_arghs, out_stream);
 
     out_stream << pusher->compose_output_fields() << "\n";
     if (argh_line_["sci-16"]) {
@@ -51,7 +48,7 @@ int ensemble_async_mpi::operator()(int argc, char* argv[]) const {
     }
 
     double time_final;
-    full_argh("tfinal", 1) >> time_final;
+    full_arghs("tfinal", 1) >> time_final;
     std::string elapsed_time_info =
         this->integrate_orbit(pusher.get(), observer.get(), time_final);
     if (argh_line_["elapsed-time"]) out_stream << elapsed_time_info << "\n";
@@ -69,9 +66,9 @@ std::string ensemble_async_mpi::convert_argv_to_string(char* argv[]) const {
 }
 
 std::pair<std::ifstream, std::ofstream> ensemble_async_mpi::get_io_streams(
-    const argh::parser& argh_line, int mpi_rank) const {
+    const argh::parser& arghs, int mpi_rank) const {
   std::string filename;
-  argh_line("prefix", "") >> filename;
+  arghs("prefix", "") >> filename;
   filename += "-" + std::to_string(mpi_rank);
   std::ifstream in_stream(filename);
   if (!in_stream.is_open())

@@ -59,12 +59,11 @@ void q_predicate::print_last_state(
   ostream_ << "\n";
 }
 
-q_predicate::q_predicate(const argh::parser& argh_line, std::ostream& os)
-    : observer_box_t(os), step_printer_(nullptr),
-      is_step_mode_(argh_line["step-mode"]) {
-  if (is_step_mode_)
-    step_printer_ = std::make_unique<step_printer>(argh_line, os);
-  argh_line("qumin", std::numeric_limits<double>::lowest()) >> qu_min_;
-  argh_line("qumax", std::numeric_limits<double>::max()) >> qu_max_;
-  argh_line("tfinal", 1) >> tfinal_;
+q_predicate::q_predicate(const argh::parser& arghs, std::ostream& os)
+    : observer_box_t(os), step_printer_(nullptr), is_step_mode_(arghs["step-"
+                                                                      "mode"]) {
+  if (is_step_mode_) step_printer_ = std::make_unique<step_printer>(arghs, os);
+  arghs("qumin", std::numeric_limits<double>::lowest()) >> qu_min_;
+  arghs("qumax", std::numeric_limits<double>::max()) >> qu_max_;
+  arghs("tfinal", 1) >> tfinal_;
 }

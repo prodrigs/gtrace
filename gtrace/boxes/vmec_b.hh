@@ -56,7 +56,8 @@ Other options controlling the iterative coordinate inversion performed by
 !*/
 class vmec_b : public field_box_t {
  public:
-  vmec_b(const argh::parser& argh_line);
+  vmec_b() = delete;
+  vmec_b(const argh::parser& arghs);
   virtual ~vmec_b() {};
   virtual const IR3field* get_electric_field() const override {
     return nullptr;

@@ -1,5 +1,5 @@
 // gtrace -- a flexible gyron-tracing application for electromagnetic fields.
-// Copyright (C) 2024 Paulo Rodrigues.
+// Copyright (C) 2024-2025 Paulo Rodrigues.
 
 // gtrace is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -31,7 +31,7 @@ class observer_box_t {
   std::ostream& ostream_;
 };
 
-observer_box_t* create_linked_observer_box(
-    const argh::parser& argh_line, std::ostream& os);
+std::unique_ptr<observer_box_t> create_linked_observer_box(
+    const argh::parser& arghs, std::ostream& os);
 
 #endif  // GTRACE_OBSERVER_BOX

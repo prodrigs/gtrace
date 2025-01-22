@@ -23,6 +23,7 @@
 #include <gtrace/boxes/pusher_box.hh>
 #include <gtrace/tools/argh.h>
 
+#include <memory>
 #include <string>
 
 /*!
@@ -49,6 +50,6 @@ class driver_box_t {
   const argh::parser argh_line_;
 };
 
-driver_box_t* create_linked_driver_box(int argc, char* argv[]);
+std::unique_ptr<driver_box_t> create_linked_driver_box(int argc, char* argv[]);
 
 #endif  // GTRACE_DRIVER_BOX

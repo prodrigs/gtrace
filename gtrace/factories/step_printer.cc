@@ -18,7 +18,7 @@
 
 #include <gtrace/boxes/step_printer.hh>
 
-observer_box_t* create_linked_observer_box(
-    const argh::parser& argh_line, std::ostream& os) {
-  return new step_printer(argh_line, os);
+std::unique_ptr<observer_box_t> create_linked_observer_box(
+    const argh::parser& arghs, std::ostream& os) {
+  return std::move(std::make_unique<step_printer>(arghs, os));
 }

@@ -20,9 +20,8 @@
 
 #include <iostream>
 
-pusher_box_t* create_linked_pusher_box(
-    const argh::parser& argh_line, const field_box_t* field_box) {
-  littlejohn1983::settings_t settings =
-      littlejohn1983::parse_settings(argh_line);
-  return new littlejohn1983(settings, field_box);
+std::unique_ptr<pusher_box_t> create_linked_pusher_box(
+    const argh::parser& arghs, const field_box_t* field_box) {
+  littlejohn1983::settings_t settings = littlejohn1983::parse_settings(arghs);
+  return std::move(std::make_unique<littlejohn1983>(settings, field_box));
 }

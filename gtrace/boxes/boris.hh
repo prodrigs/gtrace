@@ -23,8 +23,6 @@
 
 #include <gtrace/boxes/pusher_box.hh>
 
-#include <memory>
-
 using gyronimo::classical_boris;
 
 /*!
@@ -74,7 +72,7 @@ class boris : public pusher_box_t {
     double qu, qv, qw, energy, gyrophase, pitch;
     bool pb, pjac, pkin, pxyz;
   };
-  static settings_t parse_settings(const argh::parser& argh_line);
+  static settings_t parse_settings(const argh::parser& arghs);
   boris(const settings_t& settings, const field_box_t* field_box);
   virtual ~boris() {};
   virtual double push_state(double time) override;
@@ -86,7 +84,6 @@ class boris : public pusher_box_t {
   const double time_step_;
   const settings_t settings_;
   const classical_boris stepper_;
-  const field_box_t* field_box_;
   state_t state_;
   void print_header() const;
   IR3 initial_velocity_from_energy_data() const;

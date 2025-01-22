@@ -18,6 +18,7 @@
 
 #include <gtrace/boxes/vmec_b.hh>
 
-field_box_t* create_linked_field_box(const argh::parser& argh_line) {
-  return new vmec_b(argh_line);
+std::unique_ptr<field_box_t> create_linked_field_box(
+    const argh::parser& arghs) {
+  return std::move(std::make_unique<vmec_b>(arghs));
 }

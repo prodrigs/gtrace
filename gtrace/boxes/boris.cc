@@ -28,8 +28,7 @@ boris::boris(const settings_t& s, const field_box_t* field_box)
       time_step_(s.time_final / s.samples),
       stepper_(
           s.lref, s.vref, s.charge / s.mass, field_box->get_magnetic_field(),
-          field_box->get_electric_field()),
-      field_box_(field_box) {
+          field_box->get_electric_field()) {
   IR3 q_initial = {settings_.qu, settings_.qv, settings_.qw};
   IR3 v_initial = this->initial_velocity_from_energy_data();
   state_ = stepper_.half_back_step(q_initial, v_initial, 0.0, time_step_);
@@ -81,24 +80,24 @@ IR3 boris::initial_velocity_from_energy_data() const {
       settings_.gyrophase, q_initial, 0);  // time=0 ok, this is initialisation!
 }
 
-boris::settings_t boris::parse_settings(const argh::parser& argh_line) {
+boris::settings_t boris::parse_settings(const argh::parser& arghs) {
   settings_t settings;
-  argh_line("samples", 512) >> settings.samples;
-  argh_line("tfinal", 1) >> settings.time_final;
-  argh_line("lref", 1) >> settings.lref;
-  argh_line("vref", 1) >> settings.vref;
-  argh_line("mass", 1) >> settings.mass;
-  argh_line("charge", 1) >> settings.charge;
-  argh_line("qu", 0.1) >> settings.qu;
-  argh_line("qv", 0) >> settings.qv;
-  argh_line("qw", 0) >> settings.qw;
-  argh_line("energy", 1) >> settings.energy;
-  argh_line("pitch", 0.5) >> settings.pitch;
-  argh_line("gyrophase", 0) >> settings.gyrophase;
-  settings.pb = argh_line["pb"];
-  settings.pjac = argh_line["pjac"];
-  settings.pkin = argh_line["pkin"];
-  settings.pxyz = argh_line["pxyz"];
+  arghs("samples", 512) >> settings.samples;
+  arghs("tfinal", 1) >> settings.time_final;
+  arghs("lref", 1) >> settings.lref;
+  arghs("vref", 1) >> settings.vref;
+  arghs("mass", 1) >> settings.mass;
+  arghs("charge", 1) >> settings.charge;
+  arghs("qu", 0.1) >> settings.qu;
+  arghs("qv", 0) >> settings.qv;
+  arghs("qw", 0) >> settings.qw;
+  arghs("energy", 1) >> settings.energy;
+  arghs("pitch", 0.5) >> settings.pitch;
+  arghs("gyrophase", 0) >> settings.gyrophase;
+  settings.pb = arghs["pb"];
+  settings.pjac = arghs["pjac"];
+  settings.pkin = arghs["pkin"];
+  settings.pxyz = arghs["pxyz"];
   return settings;
 }
 

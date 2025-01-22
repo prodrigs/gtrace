@@ -25,8 +25,6 @@
 #include <gtrace/boxes/pusher_box.hh>
 #include <gtrace/tools/odeint_stepper.hh>
 
-#include <memory>
-
 using gyronimo::guiding_centre;
 
 /*!
@@ -77,7 +75,7 @@ class littlejohn1983 : public pusher_box_t {
     bool pb, pjac, pkin, pxyz;
     std::string odeint;
   };
-  static settings_t parse_settings(const argh::parser& argh_line);
+  static settings_t parse_settings(const argh::parser& arghs);
 
   littlejohn1983(const settings_t& settings, const field_box_t* field_box);
   virtual ~littlejohn1983() {};
@@ -92,7 +90,6 @@ class littlejohn1983 : public pusher_box_t {
   const double time_step_;
   const settings_t settings_;
   const guiding_centre eqs_motion_;
-  const field_box_t* field_box_;
   const std::unique_ptr<odeint_stepper<guiding_centre>> stepper_;
   state_t state_;
 

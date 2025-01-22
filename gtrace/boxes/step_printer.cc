@@ -20,10 +20,10 @@
 
 #include <iostream>
 
-step_printer::step_printer(const argh::parser& argh_line, std::ostream& os)
+step_printer::step_printer(const argh::parser& arghs, std::ostream& os)
     : observer_box_t(os) {
-  argh_line("skip", 0) >> skip_;
-  skipped_steps_ = (argh_line["skip-initial"] ? 0 : skip_);
+  arghs("skip", 0) >> skip_;
+  skipped_steps_ = (arghs["skip-initial"] ? 0 : skip_);
 }
 
 bool step_printer::operator()(const pusher_box_t* pusher, double time) const {

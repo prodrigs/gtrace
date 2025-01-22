@@ -20,8 +20,8 @@
 
 #include <iostream>
 
-pusher_box_t* create_linked_pusher_box(
-    const argh::parser& argh_line, const field_box_t* field_box) {
-  boris::settings_t settings = boris::parse_settings(argh_line);
-  return new boris(settings, field_box);
+std::unique_ptr<pusher_box_t> create_linked_pusher_box(
+    const argh::parser& arghs, const field_box_t* field_box) {
+  boris::settings_t settings = boris::parse_settings(arghs);
+  return std::move(std::make_unique<boris>(settings, field_box));
 }

@@ -68,9 +68,9 @@ double littlejohn1983::get_energy_tilde(const settings_t& s) {
 }
 
 double littlejohn1983::get_mu_tilde(
-    const settings_t& s, const field_box_t* fb) {
+    const settings_t& s, const field_box_t* field_box) {
   IR3 q_initial = {s.qu, s.qv, s.qw};
-  double B = fb->get_magnetic_field()->magnitude(q_initial, 0);
+  double B = field_box->get_magnetic_field()->magnitude(q_initial, 0);
   return (1 - s.pitch * s.pitch) * get_energy_tilde(s) / B;
 }
 
@@ -86,13 +86,12 @@ bool littlejohn1983::is_pxyz_inconsistent(
 
 littlejohn1983::littlejohn1983(const settings_t& s, const field_box_t* fb)
     : pusher_box_t(fb), settings_(s), time_step_(s.time_final / s.samples),
-      field_box_(fb),
       stepper_(odeint_stepper_factory<guiding_centre>(s.odeint)),
       eqs_motion_(
           s.lref, s.vref, s.charge / s.mass, get_mu_tilde(s, fb),
           dynamic_cast<const gyronimo::IR3field_c1*>(fb->get_magnetic_field()),
           fb->get_electric_field()) {
-  if (is_pxyz_inconsistent(s, fb))
+  if (is_pxyz_inconsistent(s, field_box_))
     throw std::runtime_error("inconsistent -pxyz and non-connected metric.");
   IR3 q_initial = {s.qu, s.qv, s.qw};
   state_ = eqs_motion_.generate_state(
@@ -101,24 +100,24 @@ littlejohn1983::littlejohn1983(const settings_t& s, const field_box_t* fb)
 }
 
 littlejohn1983::settings_t littlejohn1983::parse_settings(
-    const argh::parser& argh_line) {
+    const argh::parser& arghs) {
   settings_t settings;
-  argh_line("samples", 512) >> settings.samples;
-  argh_line("tfinal", 1) >> settings.time_final;
-  argh_line("lref", 1) >> settings.lref;
-  argh_line("vref", 1) >> settings.vref;
-  argh_line("mass", 1) >> settings.mass;
-  argh_line("charge", 1) >> settings.charge;
-  argh_line("qu", 0.1) >> settings.qu;
-  argh_line("qv", 0) >> settings.qv;
-  argh_line("qw", 0) >> settings.qw;
-  argh_line("energy", 1) >> settings.energy;
-  argh_line("pitch", 0.5) >> settings.pitch;
-  argh_line("gyrophase", 0) >> settings.gyrophase;
-  argh_line("odeint", "rungekutta") >> settings.odeint;
-  settings.pb = argh_line["pb"];
-  settings.pjac = argh_line["pjac"];
-  settings.pkin = argh_line["pkin"];
-  settings.pxyz = argh_line["pxyz"];
+  arghs("samples", 512) >> settings.samples;
+  arghs("tfinal", 1) >> settings.time_final;
+  arghs("lref", 1) >> settings.lref;
+  arghs("vref", 1) >> settings.vref;
+  arghs("mass", 1) >> settings.mass;
+  arghs("charge", 1) >> settings.charge;
+  arghs("qu", 0.1) >> settings.qu;
+  arghs("qv", 0) >> settings.qv;
+  arghs("qw", 0) >> settings.qw;
+  arghs("energy", 1) >> settings.energy;
+  arghs("pitch", 0.5) >> settings.pitch;
+  arghs("gyrophase", 0) >> settings.gyrophase;
+  arghs("odeint", "rungekutta") >> settings.odeint;
+  settings.pb = arghs["pb"];
+  settings.pjac = arghs["pjac"];
+  settings.pkin = arghs["pkin"];
+  settings.pxyz = arghs["pxyz"];
   return settings;
 }

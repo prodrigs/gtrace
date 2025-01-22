@@ -22,7 +22,6 @@
 #include <gyronimo/core/IR3algebra.hh>
 
 #include <gtrace/boxes/field_box.hh>
-#include <gtrace/tools/argh.h>
 
 #include <list>
 
@@ -38,9 +37,11 @@ class pusher_box_t {
   virtual IR3 get_dot_q(double time) const = 0;
   virtual std::string compose_output_fields() const = 0;
   virtual std::list<double> compose_output_values(double time) const = 0;
+ protected:
+  const field_box_t* const field_box_;
 };
 
-pusher_box_t* create_linked_pusher_box(
-    const argh::parser& command_line, const field_box_t* field_box);
+std::unique_ptr<pusher_box_t> create_linked_pusher_box(
+    const argh::parser& arghs, const field_box_t* field_box);
 
 #endif  // GTRACE_PUSHER_BOX
