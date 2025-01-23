@@ -28,7 +28,9 @@ const IR3field* vmec_b::get_magnetic_field() const {
 const metric_covariant* vmec_b::get_metric() const { return metric_.get(); }
 
 vmec_b::vmec_b(const argh::parser& arghs) : ifactory_(new cubic_gsl_factory()) {
-  parser_ = std::make_unique<parser_vmec>(arghs[1]);
+  std::string vmec_filename;
+  arghs("vmec-file", "") >> vmec_filename;
+  parser_ = std::make_unique<parser_vmec>(vmec_filename);
 
   gyronimo::multiroot_c1::settings_t settings = {
       .method = gsl_multiroot_fdfsolver_newton,

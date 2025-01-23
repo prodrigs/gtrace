@@ -35,8 +35,7 @@ Magnetic field by the mhd-equilibrium code VMEC.
 ------------------------------------------------
 
 Sets a `gyronimo::equilibrium_vmec` object (and its dependencies) by reading a
-netcdf file (mandatory, the first non-option argument) produced by the
-mhd-equilibrium code
+netcdf file produced by the mhd-equilibrium code
 [VMEC](https://princetonuniversity.github.io/STELLOPT/VMEC.html).
 
 Field options:
@@ -46,6 +45,8 @@ Field options:
     metric_vmec, morphism_vmec}`. Eventual performance improvements depend
     heavily on how particular pushers call this field and cannot be assumed a
     priori.
+
+ + `-vmec-file=val` Path to the netcdf file produced by VMEC.
 
 Other options controlling the iterative coordinate inversion performed by
 `gyronimo::morphism_vmec`:
