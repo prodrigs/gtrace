@@ -38,11 +38,7 @@ Usage examples:
 
 General help about the gtrace script is found by running `gtrace -h`.
 More information about specific drivers, pushers, fields, and observers
-boxes is found by running a command like
-
-```
-gtrace -d single_gyron.o -p boris.o -f vmec_b.o -o step_printer.o -- -h
-```
+boxes can be found in the commented source code.
 
 In the example below, the Boris algorithm is used to push a single
 charged particle (ie., the gyron native to boris.o) within the
@@ -54,12 +50,16 @@ position requested by the flag -pxyz), which is redirected to the file
 output.txt.
 
 ```
-gtrace -d single_gyron.o -p boris.o -f vmec_b.o -o step_printer.o --
-       -lref=1 -vref=1e6 -mass=4 -charge=2 -qu=0.5 -qv=0 -qw=0
-       -energy=3.5e6 -pitch=0.6 -tfinal=1 -samples=5000 -pxyz
-       wout_my_nice_vmec_field.nc > output.txt
+gtrace -d single_gyron.o -p boris.o -f vmec_b.o -o step_printer.o -- \
+    -lref=1 -vref=1e6 -mass=4 -charge=2 -qu=0.5 -qv=0 -qw=0 \
+    -energy=3.5e6 -pitch=0.6 -tfinal=1 -samples=5000 -pxyz \
+    -vmec-file=wout_my_nice_vmec_field.nc > output.txt
 ```
 
 Users frowning about long and cluttered command lines may find it more
-convenient to store those neatly in text files and expand their content
-when executing, eg, `gtrace $(< modules.txt) -- $(< options.txt)`
+convenient to have the messy list of options neatly stored in text files
+and then expand their content when executing, as in
+
+```
+gtrace $(< my_modules.txt) -- $(< omy_ptions.txt)
+```

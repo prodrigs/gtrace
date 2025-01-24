@@ -68,6 +68,8 @@ gtrace: $(GTRACE_REPO)/gtrace.in
 boxes/boris.o: boxes/boris.cc \
   boris.hh field_box.hh pusher_box.hh | boxes
 boxes/driver_box.o: boxes/driver_box.cc driver_box.hh | boxes
+boxes/ensemble_async.o: boxes/ensemble_async.cc \
+  ensemble_async.hh driver_box.hh observer_box.hh pusher_box.hh | boxes
 boxes/ensemble_async_mpi.o: boxes/ensemble_async_mpi.cc \
   ensemble_async_mpi.hh driver_box.hh observer_box.hh pusher_box.hh | boxes
 boxes/littlejohn1983.o: boxes/littlejohn1983.cc \
@@ -87,6 +89,8 @@ factories/boris.o: factories/boris.cc \
   boris.hh field_box.hh pusher_box.hh | factories
 factories/littlejohn1983.o: factories/littlejohn1983.cc \
   littlejohn1983.hh field_box.hh pusher_box.hh | factories
+factories/ensemble_async.o: factories/ensemble_async.cc \
+  ensemble_async.hh driver_box.hh observer_box.hh pusher_box.hh | factories
 factories/ensemble_async_mpi.o: factories/ensemble_async_mpi.cc \
   ensemble_async_mpi.hh driver_box.hh observer_box.hh pusher_box.hh | factories
 factories/q_predicate.o: factories/q_predicate.cc \
