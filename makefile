@@ -83,6 +83,7 @@ boxes/single_gyron.o: boxes/single_gyron.cc \
 boxes/step_printer.o: boxes/step_printer.cc \
   step_printer.hh observer_box.hh | boxes
 boxes/vmec_b.o: boxes/vmec_b.cc vmec_b.hh field_box.hh | boxes
+boxes/helena_b.o: boxes/helena_b.cc helena_b.hh field_box.hh | boxes
 
 # factories section (alphabetic order):
 factories/boris.o: factories/boris.cc \
@@ -100,6 +101,7 @@ factories/single_gyron.o: factories/single_gyron.cc \
 factories/step_printer.o: factories/step_printer.cc \
   step_printer.hh observer_box.hh pusher_box.hh | factories
 factories/vmec_b.o: factories/vmec_b.cc vmec_b.hh field_box.hh | factories
+factories/helena_b.o: factories/helena_b.cc helena_b.hh field_box.hh | factories
 
 # utilities section:
 boxes:
