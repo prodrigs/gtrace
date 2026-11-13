@@ -30,6 +30,24 @@ using gyronimo::metric_helena;
 using gyronimo::morphism_helena;
 using gyronimo::parser_helena;
 
+/*!
+Magnetic field by the mhd-equilibrium code HELENA.
+
+Sets a `gyronimo::equilibrium_helena` object (and its dependencies) by reading a
+hmap file produced by the mhd-equilibrium code HELENA (G. Huysmans et al., Int.
+J. Mod. Phys. C **2**, 371 (1991).
+
+## General options:
+
+`-cached`
+  : Builds a level-1 cached version of the objects `gyronimo::{equilibrium_helena,
+    metric_helena, morphism_helena}`. Eventual performance improvements depend
+    heavily on how particular pushers call this field and cannot be assumed a
+    priori.
+
+`-helena-file=val`
+  : Path to the hmap file produced by HELENA.
+!*/
 class helena_b : public field_box_t {
  public:
   helena_b() = delete;
